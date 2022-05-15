@@ -1481,7 +1481,6 @@ class GUIModelExtractor {
             const detection = detections[index];
 
             // DEBUG
-            console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
             console.log("[detection]", detection.name, detection.score);
 
             const matchedNode = this.getMatchedNode(detection.xmin, detection.xmax, detection.ymin, detection.ymax);
@@ -2085,7 +2084,88 @@ class GUIModelExtractor {
     }
 }
 
-let screenRoot = null;
+let screenRoot = new SegmentedScreen();
+var targetGUIElements = null; //타겟 엘리먼트 최근에 본 걸로 저장
+//시선 대신 마우스 위치로 실험용
+var mouse_x = 0;
+var mouse_y = 0;
+function mouse(e){
+    mouse_x = e.pageX;
+    mouse_y = e.pageY;
+}
+window.addEventListener("mousemove",mouse);
+//특정 좌표 클릭하는 함수
+function left_click(x,y){
+    jQuery(document.elementFromPoint(x,y)).click();
+}
+//SpeechRecognition 시작
+var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecgonition;
+var SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+var SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecgonitionEvent;
+var recognition = new webkitSpeechRecognition();
+const interfaces = ['left','right','down','up'];
+const grammar = '#JSFG V1.0; grammar interfaces; public <interface> = ' + interfaces.join(' | ') + ' ;';
+var speechRecognitionList = new webkitSpeechGrammarList();
+speechRecognitionList.addFromString(grammar,1);
+recognition.grammars = speechRecognitionList;
+recognition.interimResults = false;
+recognition.continuous = false;
+//recognition.lang = 'en-US'; //언어설정
+recognition.maxAlternatives = 1;
+recognition.addEventListener("result",(e)=> {
+    console.log(targetGUIElements);
+    let result = e.results[0][0].transcript;
+    console.log("결과 : " + result);
+    if(targetGUIElements){
+        //var target_center = {x:(targetGUIElements[0].matchedNodeRect.xmax+targetGUIElements[0].matchedNodeRect.xmin)*0.5,y:(targetGUIElements[0].matchedNodeRect.ymax+targetGUIElements[0].matchedNodeRect.ymin)*0.5};
+        if(result == '레프트'){
+            console.log('왼쪽');
+        }
+        else if (result == '라이트'){
+            console.log('오른쪽');
+        }
+        else if (result == '업'){
+            console.log('위');
+        }
+        else if (result == '다운'){
+            console.log('아래');
+        }
+        else if (result == '클릭'){
+            left_click(mouse_x,mouse_y);
+            console.log('클릭');
+        }
+        else if (result == '페이지 다운'){
+            window.scrollTo({left : mouse_x, top: mouse_y+500, behavior: "smooth"});
+            console.log('페이지 다운');
+        }
+        else if (result == '페이지 업'){
+            window.scrollTo({left:mouse_x, top : mouse_y-500,behavior : "smooth"});
+            console.log('페이지 업');
+        }
+        else if (result == '뒤로'){
+            window.history.go(-1);
+        }
+        else if (result == '앞으로'){
+            window.history.go(1);
+        }
+    }
+});
+recognition.addEventListener("end",recognition.start);
+recognition.start();
+// SpeechRecognition 끝
+function getTarget(){
+    var loca = {x:mouse_x,y:mouse_y};
+    var temp = (screenRoot.segmentsFromPoint(loca.x,loca.y) != null) ? screenRoot.segmentsFromPoint(loca.x,loca.y) : null ;
+    if(targetGUIElements){
+        if (temp){
+            targetGUIElements = temp;
+        }
+    }
+    else{
+        targetGUIElements = temp;
+    }
+}
+
 
 /**
  * @Communication_channels_with_background
@@ -2180,16 +2260,15 @@ window.addEventListener("load", function (event) {
     targetResources = new Array();
     resource_num = 0;
 
-    const interval = setInterval(function () {
-        if (targetResources.length == resource_num) {
 
-            requestScreenParse();
+    if (targetResources.length == resource_num) {
 
-            clearInterval(interval);
-        } else {
-            resource_num = targetResources.length;
-        }
-    }, 300);
+        requestScreenParse();
+        setInterval(getTarget,1000);
+    } else {
+        resource_num = targetResources.length;
+    }
+
 });
 
 // Page URL change listener
