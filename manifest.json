@@ -26,7 +26,8 @@
         "libraries/annyang.min.js",
         "libraries/compromise.min.js",
         "libraries/compromise-numbers.min.js",
-        "content_script.js"
+        "content_script.js",
+        "libraries/jquery-3.6.0.min.js"
       ],
       "run_at": "document_start"
     }

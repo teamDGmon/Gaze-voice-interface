@@ -371,7 +371,6 @@ function checkImageSimilarity(current_dataURI) {
         devtoolsHandler.attach(tabId);
     }
 });
-
 let cur_url = null;
 let onrender_time_sum = 0;
 let onrender_cnt = 0;
