@@ -2166,6 +2166,65 @@ function getTarget(){
     }
 }
 
+// WebGazer 시작
+var gaze_x = 0, gaze_y = 0
+var isCalibrated = false
+function initWebGazer() {
+    if (!webgazer.detectCompatibility()) {
+        console.log('WebGazer is incompatible')
+        return
+    }
+    webgazer.setGazeListener(function (data, elapsedTime) {
+        if (!data) return
+        gaze_x = data.x
+        gaze_y = data.y
+        console.log(gaze_x, gaze_y)
+    }).begin()
+}
+function calibrateWebGazer() {
+    const plottingCanvas = document.createElement('canvas')
+    plottingCanvas.id = 'plotting_canvas'
+    plottingCanvas.width = 500
+    plottingCanvas.height = 500
+    plottingCanvas.style.cursor = 'crosshair'
+    document.body.appendChild(plottingCanvas)
+    const calibrationDiv = document.createElement('div')
+    const calibrationButtonCommonStyle = {
+        width: '20px',
+        height: '20px',
+        borderRadius: '25px',
+        backgroundColor: 'red',
+        opacity: 0.2,
+        borderColor: 'black',
+        borderStyle: 'solid',
+        position: 'fixed'
+    }
+    const calibrationButtonEachStyle = [
+        {top: '70px', left: '340px'},
+        {top: '70px', left: '50vw'},
+        {top: '70px', right: '2vw'},
+        {top: '50vh', left: '2vw'},
+        {top: '50vh', left: '50vw'},
+        {top: '50vh', right: '2vw'},
+        {bottom: '2vw', left: '2vw'},
+        {bottom: '2vw', left: '50vw'},
+        {bottom: '2vw', right: '2vw'},
+    ]
+    for (let i = 0; i < 9; i++) {
+        const calibrationButton = document.createElement('input')
+        calibrationButton.type = 'button'
+        calibrationButton.className = 'Calibration'
+        calibrationButton.id = `Pt${i+1}`
+        const calibrationButtonStyle = {...calibrationButtonCommonStyle, ...calibrationButtonEachStyle[i]}
+        for (const key in calibrationButtonStyle) {
+            calibrationButton.style[key] = calibrationButtonStyle[key]
+        }
+        calibrationDiv.appendChild(calibrationButton)
+    }
+    document.body.appendChild(calibrationDiv)
+    startCalibration()
+}
+// WebGazer 끝
 
 /**
  * @Communication_channels_with_background
@@ -2219,6 +2278,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
             break;
         }
+
+        case "calibrateWebGazer": {
+            calibrateWebGazer()
+        }
     }
 });
 
@@ -2257,12 +2320,13 @@ resource_observer.observe({ entryTypes: ["resource"] });
 layout_shift_observer.observe({ entryTypes: ["layout-shift"] });
 
 window.addEventListener("load", function (event) {
+
+    initWebGazer()
+
     targetResources = new Array();
     resource_num = 0;
 
-
     if (targetResources.length == resource_num) {
-
         requestScreenParse();
         setInterval(getTarget,1000);
     } else {

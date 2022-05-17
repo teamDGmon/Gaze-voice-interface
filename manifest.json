@@ -27,7 +27,9 @@
         "libraries/compromise.min.js",
         "libraries/compromise-numbers.min.js",
         "content_script.js",
-        "libraries/jquery-3.6.0.min.js"
+        "libraries/jquery-3.6.0.min.js",
+        "libraries/webgazer/webgazer.js",
+        "libraries/webgazer/calibration.js"
       ],
       "run_at": "document_start"
     }

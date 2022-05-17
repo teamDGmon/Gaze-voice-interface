@@ -6,7 +6,7 @@
 let backgroundPageView = chrome.extension.getBackgroundPage();
 
 let view_segment_buttons, view_screenshot;
-let button_screenshot, button_clear, button_done;
+let button_screenshot, button_clear, button_done, button_calibrate;
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -21,6 +21,15 @@ document.addEventListener('DOMContentLoaded', function () {
     view_screenshot = document.getElementById('screenshot-view');
     button_clear = document.getElementById("clear-annotation");
     button_done = document.getElementById("finish-annotation");
+
+    /**
+     * WebGazer calibration
+     */
+    button_calibrate = document.getElementById('start-calibrate')
+    button_calibrate.addEventListener('click', function() {chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {method: "calibrateWebGazer"});
+    });
+    })
 
     let sessionState = backgroundPageView.getSessionState();
     popupViewUpdate(sessionState);
