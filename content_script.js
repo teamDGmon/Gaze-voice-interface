@@ -2168,18 +2168,46 @@ function getTarget(){
 
 // WebGazer 시작
 var gaze_x = 0, gaze_y = 0
-var isCalibrated = false
+const prevGazePoint = {
+    x: 0,
+    y: 0
+}
+const gazeMoveThreshold = 0.05
+const screenSize = {
+    width: 0,
+    height: 0
+}
 function initWebGazer() {
     if (!webgazer.detectCompatibility()) {
         console.log('WebGazer is incompatible')
         return
     }
+    screenSize.width = window.screen.width
+    screenSize.height = window.screen.height
+    const pointer = document.createElement('div')
+    pointer.style.display = 'block'
+    pointer.style.position = 'fixed'
+    pointer.style.zIndex = 9999
+    pointer.style.left = '-5px'
+    pointer.style.top = '-5px'
+    pointer.style.background = 'red'
+    pointer.style.borderRadius = '100%'
+    pointer.style.opacity = 0.7
+    pointer.style.width = '10px'
+    pointer.style.height = '10px'
+    pointer.style.transitionDuration = '0.5s'
+    document.body.appendChild(pointer)
     webgazer.setGazeListener(function (data, elapsedTime) {
         if (!data) return
+        const offset_x = Math.abs(data.x - prevGazePoint.x)
+        const offset_y = Math.abs(data.y - prevGazePoint.y)
+        if (offset_x < screenSize.width * gazeMoveThreshold && offset_y < screenSize.height * gazeMoveThreshold) return  // smoothing
         gaze_x = data.x
         gaze_y = data.y
-        console.log(gaze_x, gaze_y)
-    }).begin()
+        pointer.style.transform = `translate3d(${gaze_x}px, ${gaze_y}px, 0px)`
+        prevGazePoint.x = gaze_x
+        prevGazePoint.y = gaze_y
+    }).showPredictionPoints(false).begin()
 }
 function calibrateWebGazer() {
     const plottingCanvas = document.createElement('canvas')
