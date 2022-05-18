@@ -2087,13 +2087,6 @@ class GUIModelExtractor {
 let screenRoot = new SegmentedScreen();
 var targetGUIElements = null; //타겟 엘리먼트 최근에 본 걸로 저장
 //시선 대신 마우스 위치로 실험용
-var mouse_x = 0;
-var mouse_y = 0;
-function mouse(e){
-    mouse_x = e.pageX;
-    mouse_y = e.pageY;
-}
-window.addEventListener("mousemove",mouse);
 //특정 좌표 클릭하는 함수
 function left_click(x,y){
     jQuery(document.elementFromPoint(x,y)).click();
@@ -2154,7 +2147,7 @@ recognition.addEventListener("end",recognition.start);
 recognition.start();
 // SpeechRecognition 끝
 function getTarget(){
-    var loca = {x:mouse_x,y:mouse_y};
+    var loca = {x:gaze_x,y:gaze_y};
     var temp = (screenRoot.segmentsFromPoint(loca.x,loca.y) != null) ? screenRoot.segmentsFromPoint(loca.x,loca.y) : null ;
     if(targetGUIElements){
         if (temp){
