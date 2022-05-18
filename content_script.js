@@ -2147,7 +2147,6 @@ recognition.start();
 // SpeechRecognition 끝
 function getTarget(){
     var loca = {x:gaze_x,y:gaze_y};
-    console.log(loca.x,loca.y);
     var temp = (screenRoot.segmentsFromPoint(loca.x,loca.y) != null) ? screenRoot.segmentsFromPoint(loca.x,loca.y) : null ;
     if(targetGUIElements){
         if (temp){
