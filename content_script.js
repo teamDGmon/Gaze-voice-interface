@@ -2086,7 +2086,6 @@ class GUIModelExtractor {
 
 let screenRoot = new SegmentedScreen();
 var targetGUIElements = null; //타겟 엘리먼트 최근에 본 걸로 저장
-//시선 대신 마우스 위치로 실험용
 //특정 좌표 클릭하는 함수
 function left_click(x,y){
     jQuery(document.elementFromPoint(x,y)).click();
@@ -2124,15 +2123,15 @@ recognition.addEventListener("result",(e)=> {
             console.log('아래');
         }
         else if (result == '클릭'){
-            left_click(mouse_x,mouse_y);
+            left_click(gaze_x,gaze_y);
             console.log('클릭');
         }
         else if (result == '페이지 다운'){
-            window.scrollTo({left : mouse_x, top: mouse_y+500, behavior: "smooth"});
+            window.scrollTo({left : gaze_x, top: gaze_y+500, behavior: "smooth"});
             console.log('페이지 다운');
         }
         else if (result == '페이지 업'){
-            window.scrollTo({left:mouse_x, top : mouse_y-500,behavior : "smooth"});
+            window.scrollTo({left:gaze_x, top : gaze_y-500,behavior : "smooth"});
             console.log('페이지 업');
         }
         else if (result == '뒤로'){
@@ -2148,6 +2147,7 @@ recognition.start();
 // SpeechRecognition 끝
 function getTarget(){
     var loca = {x:gaze_x,y:gaze_y};
+    console.log(loca.x,loca.y);
     var temp = (screenRoot.segmentsFromPoint(loca.x,loca.y) != null) ? screenRoot.segmentsFromPoint(loca.x,loca.y) : null ;
     if(targetGUIElements){
         if (temp){
@@ -2157,6 +2157,7 @@ function getTarget(){
     else{
         targetGUIElements = temp;
     }
+    console.log(targetGUIElements);
 }
 
 // WebGazer 시작
