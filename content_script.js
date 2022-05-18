@@ -2156,7 +2156,6 @@ function getTarget(){
     else{
         targetGUIElements = temp;
     }
-    console.log(targetGUIElements);
 }
 
 // WebGazer 시작
