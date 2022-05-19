@@ -402,7 +402,7 @@ chrome.runtime.onMessage.addListener(
                 onScreenParsed(params.screen_width, params.screen_height, params.detections, params.segments, params.url, params.hostname);
 
                 // 임시로 그린거 보여주기
-                renderParseResults();
+                //renderParseResults();
                 break;
             }
 
