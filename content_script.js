@@ -2086,14 +2086,9 @@ class GUIModelExtractor {
 
 let screenRoot = new SegmentedScreen();
 var targetGUIElements = []; //타겟 엘리먼트 최근에 본 걸로 저장
-//시선 대신 마우스 위치로 실험용
-var mouse_x = 0;
-var mouse_y = 0;
-function mouse(e){
-    mouse_x = e.pageX;
-    mouse_y = e.pageY;
-}
-window.addEventListener("mousemove",mouse);
+var magnified = false;
+var scale = 1;
+
 //특정 좌표 클릭하는 함수
 function left_click(x,y){
     jQuery(document.elementFromPoint(x,y)).click();
@@ -2122,28 +2117,21 @@ recognition.addEventListener("result",(e)=> {
     if(targetGUIElements){
         //var target_center = {x:(targetGUIElements[0].matchedNodeRect.xmax+targetGUIElements[0].matchedNodeRect.xmin)*0.5,y:(targetGUIElements[0].matchedNodeRect.ymax+targetGUIElements[0].matchedNodeRect.ymin)*0.5};
         if(result == '레프트'){
-            console.log('왼쪽');
         }
         else if (result == '라이트'){
-            console.log('오른쪽');
         }
         else if (result == '업'){
-            console.log('위');
         }
         else if (result == '다운'){
-            console.log('아래');
         }
         else if (result == '클릭'){
             left_click(gaze_x,gaze_y);
-            console.log('클릭');
         }
         else if (result == '페이지 다운'){
-            window.scrollTo({left : gaze_x, top: gaze_y+500, behavior: "smooth"});
-            console.log('페이지 다운');
+            window.scrollTo({left:gaze_x, top : gaze_y+500/scale,behavior : "smooth"});
         }
         else if (result == '페이지 업'){
-            window.scrollTo({left:gaze_x, top : gaze_y-500,behavior : "smooth"});
-            console.log('페이지 업');
+            window.scrollTo({left:gaze_x, top : gaze_y-500/scale,behavior : "smooth"});
         }
         else if (result == '뒤로'){
             window.history.go(-1);
@@ -2159,7 +2147,8 @@ recognition.addEventListener("result",(e)=> {
                     targetGUIElements[i].matchedNode.style.border = null;
                 }*/
                 targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
-    
+                console.log(targetGUIElements[targetGUIElementsIndex].matchedNode);
+                console.log()
                 zoom.to({
                     element: (targetGUIElements[targetGUIElementsIndex].matchedNode),
                     // Zoom 수행 이후 불려지는 callback 함수
@@ -2285,8 +2274,6 @@ var eyeData = [];
 var runs = 0;
 
 var targetGUIElementsIndex = 0;
-var magnified = false;
-
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     switch (request.method) {
         case "startParse": { // Need to parse
@@ -2436,6 +2423,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                                 }
                             }
                             if (options.scale > 1) {
+                                scale = options.scale;
                                 options.x *= options.scale;
                                 options.y *= options.scale;
                                 options.x = Math.max(options.x, 0);
@@ -2454,6 +2442,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                         clearTimeout(callbackTimeout);
                         magnify({ x: 0, y: 0 }, 1);
                         level = 1;
+                        scale = 1;
                     },
                     magnify: function (options) { this.to(options) },
                     reset: function () { this.out() },
