@@ -2154,7 +2154,7 @@ recognition.addEventListener("result",(e)=> {
         else if (result == '줌'){
             if (targetGUIElements.length > 0 && !magnified){
                 magnified = true;
-                targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
+                targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
                 /*
                 for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                     targetGUIElements[i].matchedNode.style.border = null;
@@ -2188,8 +2188,8 @@ function getTarget(){
         targetGUIElements = temp;
     }
     if(temp.length != 0){
-        targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
-        temp[temp.length-1].matchedNode.style.border = 'solid red';
+        targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
+        temp[temp.length-1].matchedNode.style.boxShadow = '0 0 0 2px red inset';
         targetGUIElements = temp;
     }
 }
@@ -2230,11 +2230,35 @@ function initWebGazer() {
         const offset_x = Math.abs(data.x - prevGazePoint.x)
         const offset_y = Math.abs(data.y - prevGazePoint.y)
         if (offset_x < screenSize.width * gazeMoveThreshold && offset_y < screenSize.height * gazeMoveThreshold) return  // smoothing
-        gaze_x = data.x
-        gaze_y = data.y
+        if (magnified){
+            var element_xmin = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin;
+            var element_xmax = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmax;
+            var element_width = element_xmax - element_xmin;
+            var element_ymin = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin;
+            var element_ymax = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymax;
+            var element_height = element_ymax - element_ymin;
+            var scale = 1.0;
+            gaze_x = element_xmin + element_width/window.innerWidth*data.x;
+            gaze_y = element_ymin + element_width/window.innerWidth*data.y;
+            if (element_width >= window.innerWidth) {
+                scale = Math.max(window.innerHeight / element_height, 1);
+            }else if (element_height >= window.innerHeight){
+                scale = Math.max(window.innerWidth / element_width, 1);
+            }else{
+                scale = Math.max(Math.min(window.innerWidth / element_width, window.innerHeight / element_height), 1);
+            }
+            gaze_x = element_xmin + data.x/scale;
+            gaze_y = element_ymin + data.y/scale;
+            pointer.style.width = String(10/scale) + 'px'
+            pointer.style.height = String(10/scale) + 'px'
+        }
+        else {
+            gaze_x = data.x
+            gaze_y = data.y
+        }
         pointer.style.transform = `translate3d(${gaze_x}px, ${gaze_y}px, 0px)`
-        prevGazePoint.x = gaze_x
-        prevGazePoint.y = gaze_y
+        prevGazePoint.x = data.x
+        prevGazePoint.y = data.y
     }).showPredictionPoints(false).begin()
 }
 function calibrateWebGazer() {
@@ -2574,7 +2598,7 @@ function keyListener(e){
             for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                 targetGUIElements[i].matchedNode.style.border = null;
             }*/
-            targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
+            targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
             targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
 
             zoom.to({
