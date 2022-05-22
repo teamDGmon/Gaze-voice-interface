@@ -41,7 +41,8 @@
     "select_UI_segments.js",
     "popup_type_labeler.html",
     "popup_type_labeler.js",
-    "worker_performance_observer.js"
+    "worker_performance_observer.js", 
+    "image/arrow.png"
   ],
   "permissions": [
     "tabs",

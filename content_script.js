@@ -2471,7 +2471,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             })();
 
             screenParser.parseGUIScreen(detections, screen_width, screen_height, prevActionTarget);
-
+            setOutterButton()
             break;
         }
 
@@ -2488,6 +2488,77 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         }
     }
 });
+
+var setButtonElement = function(top, left, str){
+    var tmpElement = document.createElement('div');
+    var tmpButton = document.createElement('div');
+    var tmpstr = document.createElement('div');
+    tmpstr.textContent = str
+    tmpButton.style.display = 'inline-block';
+    tmpButton.style.border = '40px solid transparent';
+    tmpButton.style.borderLeftColor = 'red';
+    tmpElement.appendChild(tmpButton)
+    tmpElement.appendChild(tmpstr)
+    tmpElement.style.position = 'fixed';
+    tmpElement.style.top = top;
+    tmpElement.style.left = left;
+    tmpElement.style.border = '1px solid red'
+    tmpElement.style.borderRadius = '20px'
+    return tmpElement
+}
+
+
+var setOutterButton = function(){
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    var arrow = chrome.runtime.getURL('image/arrow.png')
+
+    // show based on element
+    var leftElement = document.createElement('div');
+    var leftButton = document.createElement('img');
+    var leftstr = document.createElement('div');
+    leftstr.textContent = 'Left';
+    leftstr.style.textAlign = 'center';
+    leftstr.style.borderBottom = '5px'
+    leftButton.src = arrow;
+    leftButton.style.width = '40px';
+    leftButton.style.transform = 'rotate(180deg)';
+    leftButton.style.WebkitTransform = 'rotate(180deg)';
+    leftButton.style.margin = '0 auto';
+    leftButton.style.display = 'block';
+    leftElement.appendChild(leftButton);
+    leftElement.appendChild(leftstr);
+    leftElement.style.position = 'fixed';
+    leftElement.style.top = '300px';
+    leftElement.style.left = '20px';
+    leftElement.style.border = '1px solid black';
+    leftElement.style.width = '60px'
+    leftElement.style.height = '60px'
+    leftElement.style.borderRadius = '5px';
+    document.body.appendChild(leftElement)
+
+    var rightElement = document.createElement('div');
+    var rightButton = document.createElement('img');
+    var rightstr = document.createElement('div');
+    rightstr.textContent = 'Right';
+    rightstr.style.textAlign = 'center';
+    rightstr.style.borderBottom = '5px'
+    rightButton.src = arrow;
+    rightButton.style.width = '40px';
+    rightButton.style.margin = '0 auto';
+    rightButton.style.display = 'block';
+    rightElement.appendChild(rightButton);
+    rightElement.appendChild(rightstr);
+    rightElement.style.position = 'fixed';
+    rightElement.style.top = '300px';
+    rightElement.style.left = '90px';
+    rightElement.style.border = '1px solid black';
+    rightElement.style.width = '60px'
+    rightElement.style.height = '60px'
+    rightElement.style.borderRadius = '5px';
+    document.body.appendChild(rightElement)
+}
 
 
 function keyListener(e){
