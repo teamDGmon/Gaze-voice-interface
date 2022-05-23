@@ -2318,6 +2318,24 @@ recognition.addEventListener("result",(e)=> {
                 left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
             }
         }
+        else if (result == '네 번째로'){
+            if(magnified && links_objects && links_objects.length >2){
+                var rect = links_objects[3].matchedNodeRect;
+                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+            }
+        }
+        else if (result == '다섯 번째로'){
+            if(magnified && links_objects && links_objects.length >2){
+                var rect = links_objects[4].matchedNodeRect;
+                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+            }
+        }
+        else if (result == '여섯 번째로'){
+            if(magnified && links_objects && links_objects.length >2){
+                var rect = links_objects[5].matchedNodeRect;
+                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+            }
+        }
         else if (result.split(' ')[0] == '검색'){
             console.log(screenRoot.childSegments[find_search()]);
             var search_node = screenRoot.childSegments[find_search()].searchInputNode;
