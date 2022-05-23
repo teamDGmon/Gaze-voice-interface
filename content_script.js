@@ -2194,6 +2194,12 @@ function left_click(x,y){
 var zoom = function() {
     console.log("zoom is not initialized yet");
 };
+var simpleZoomIn = function() {
+    console.log("simple zoom is not initialized yet");
+};
+var simpleZoomOut = function() {
+    console.log("simple zoom is not initialized yet");
+};
 //SpeechRecognition 시작
 var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecgonition;
 var SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
@@ -2442,6 +2448,8 @@ function initWebGazer() {
         else {
             gaze_x = data.x
             gaze_y = data.y
+            pointer.style.width = '10px'
+            pointer.style.height = '10px'   
         }
         pointer.style.transform = `translate3d(${gaze_x}px, ${gaze_y}px, 0px)`
         prevGazePoint.x = data.x
@@ -2538,6 +2546,18 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
                 // initSeamlisInterfaces();
             });
+            simpleZoomIn = function(){
+                document.body.style.zoom = 2;
+                document.body.style.left = -(gaze_x - window.innerWidth/4) + 'px';
+                document.body.style.top = -(gaze_y - window.innerHeight/4) + 'px';
+                document.body.style.position = 'relative';
+            }
+            simpleZoomOut = function(){
+                document.body.style.zoom = 1;
+                document.body.style.left = '';
+                document.body.style.top = '';
+                document.body.style.position = '';
+            }
 
             zoom = (function () {
                 var TRANSITION_DURATION = 50;
@@ -2852,6 +2872,12 @@ function keyListener(e){
     }
     if (e.code === 'KeyA'){
         prev_elements[0].click();
+    }
+    if (e.code === 'ControlLeft'){
+        simpleZoomIn();
+    }
+    if (e.code === 'AltLeft'){
+        simpleZoomOut();
     }
 }
 window.addEventListener("keydown", keyListener);
