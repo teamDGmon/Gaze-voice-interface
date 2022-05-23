@@ -2243,12 +2243,20 @@ recognition.addEventListener("result",(e)=> {
                 document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x-1) * 500+move).toString()+'px';
             }
         }
+        // 여기서 부터 새로 추가
         else if (result == '이전'){
             prev_elements[0].click();
         }
         else if (result == '다음'){
             next_elements[0].click();
         }
+        else if (result == '확대'){
+            simpleZoomIn();
+        }
+        else if (result == '축소'){
+            simpleZoomOut();
+        }
+        // 여기까지
         else if (result == '클릭'){
             left_click(gaze_x,gaze_y);
         }
@@ -2284,7 +2292,7 @@ recognition.addEventListener("result",(e)=> {
         else if (result == '줌' || result =='춤'){
             if (targetGUIElements.length > 0 && !magnified){
                 magnified = true;
-                targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
+                targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
                 /*
                 for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                     targetGUIElements[i].matchedNode.style.border = null;
@@ -2375,20 +2383,21 @@ recognition.start();
 function getTarget(){
     var loca = {x:gaze_x,y:gaze_y};
     var temp = screenRoot.segmentsFromPoint(loca.x,loca.y);
-    if (targetGUIElements.length == 0){
-        targetGUIElements = temp;
-        findButtons();
-    }
     if(temp.length != 0){
-        targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
-        temp[temp.length-1].matchedNode.style.boxShadow = '0 0 0 2px red inset';
+        if (targetGUIElements.length != 0){
+            targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
+        }
+        temp[temp.length-1].matchedNode.style.boxSizing = 'border-box';
+        temp[temp.length-1].matchedNode.style.border = 'solid red';
         targetGUIElements = temp;
         findButtons();
     }
 }
 
 // WebGazer 시작
-var gaze_x = 0, gaze_y = 0
+var gaze_x = 0, gaze_y = 0;
+var simple_x = 0, simple_y = 0; // save simpleZoom center point's coordinate
+var simple_magnified = false;
 const prevGazePoint = {
     x: 0,
     y: 0
@@ -2442,14 +2451,22 @@ function initWebGazer() {
             }
             gaze_x = element_xmin + data.x/scale;
             gaze_y = element_ymin + data.y/scale;
-            pointer.style.width = String(10/scale) + 'px'
-            pointer.style.height = String(10/scale) + 'px'
+            pointer.style.width = String(10/scale) + 'px';
+            pointer.style.height = String(10/scale) + 'px';
         }
         else {
-            gaze_x = data.x
-            gaze_y = data.y
-            pointer.style.width = '10px'
-            pointer.style.height = '10px'   
+            if (simple_magnified){
+                gaze_x = simple_x - window.innerWidth/4 + data.x/2;
+                gaze_y = simple_y - window.innerHeight/4 + data.y/2;
+                pointer.style.width = '5px';
+                pointer.style.height = '5px';
+            }
+            else {
+                gaze_x = data.x;
+                gaze_y = data.y;
+                pointer.style.width = '10px';
+                pointer.style.height = '10px';
+            }
         }
         pointer.style.transform = `translate3d(${gaze_x}px, ${gaze_y}px, 0px)`
         prevGazePoint.x = data.x
@@ -2547,16 +2564,32 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                 // initSeamlisInterfaces();
             });
             simpleZoomIn = function(){
+                if (gaze_x - window.innerWidth/4 > 0){
+                    document.body.style.left = -(gaze_x - window.innerWidth/4) + 'px';
+                    simple_x = gaze_x;
+                }
+                else {
+                    document.body.style.left = '0px';
+                    simple_x = window.innerWidth/4;
+                }
+                if (gaze_y - window.innerHeight/4 > 0){
+                    document.body.style.top = -(gaze_y - window.innerHeight/4) + 'px';
+                    simple_y = gaze_y;
+                }
+                else {
+                    document.body.style.top = '0px';
+                    simple_y = window.innerHeight/4;
+                }
                 document.body.style.zoom = 2;
-                document.body.style.left = -(gaze_x - window.innerWidth/4) + 'px';
-                document.body.style.top = -(gaze_y - window.innerHeight/4) + 'px';
                 document.body.style.position = 'relative';
+                simple_magnified = true;
             }
             simpleZoomOut = function(){
                 document.body.style.zoom = 1;
                 document.body.style.left = '';
                 document.body.style.top = '';
                 document.body.style.position = '';
+                simple_magnified = false;
             }
 
             zoom = (function () {
@@ -2852,7 +2885,7 @@ function keyListener(e){
             for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                 targetGUIElements[i].matchedNode.style.border = null;
             }*/
-            targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
+            targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
             targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
 
             zoom.to({
