@@ -2177,6 +2177,8 @@ var scale = 1;
 var scroll_x = 0;
 var scroll_y = 0;
 var links_objects = [];
+var prev_elements = [];
+var next_elements = [];
 function find_search(){
     var length = screenRoot.childSegments.length;
     for(var i=0;i<length;i++){
@@ -2234,6 +2236,12 @@ recognition.addEventListener("result",(e)=> {
                 }
                 document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x-1) * 500+move).toString()+'px';
             }
+        }
+        else if (result == '이전'){
+            prev_elements[0].click();
+        }
+        else if (result == '다음'){
+            next_elements[0].click();
         }
         else if (result == '클릭'){
             left_click(gaze_x,gaze_y);
@@ -2363,11 +2371,13 @@ function getTarget(){
     var temp = screenRoot.segmentsFromPoint(loca.x,loca.y);
     if (targetGUIElements.length == 0){
         targetGUIElements = temp;
+        findButtons();
     }
     if(temp.length != 0){
         targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
         temp[temp.length-1].matchedNode.style.boxShadow = '0 0 0 2px red inset';
         targetGUIElements = temp;
+        findButtons();
     }
 }
 
@@ -2765,8 +2775,8 @@ function findButtons(){
     var element_buttons = targetGUIElements[targetGUIElements.length-1].matchedNode.getElementsByTagName('button')
     var element_as = targetGUIElements[targetGUIElements.length-1].matchedNode.getElementsByTagName('a')
 
-    var prev_elements = [];
-    var next_elements = [];
+    prev_elements = [];
+    next_elements = [];
     for (var i = 0 ; i < element_buttons.length; i++){
         var tmp_attributes = element_buttons[i].attributes;
         var check_attri_prev = false;
@@ -2805,8 +2815,6 @@ function findButtons(){
             next_elements.push(element_as[i]);
         }
     }
-    console.log(prev_elements);
-    console.log(next_elements);
 }
 
 
@@ -2839,18 +2847,12 @@ function keyListener(e){
  
         }
     }
-    // if (e.code === 'KeyD'){
-    //     if (modalOpened && gazedGUIElementIndex < gazedGUIElements.length-1){
-    //         gazedGUIElementIndex += 1;
-    //         magnify(gazedGUIElements[gazedGUIElementIndex].matchedNode);
-    //     }
-    // }
-    // if (e.code === 'KeyA'){
-    //     if (modalOpened && gazedGUIElementIndex > 0){
-    //         gazedGUIElementIndex -= 1;
-    //         magnify(gazedGUIElements[gazedGUIElementIndex].matchedNode);
-    //     }
-    // }
+    if (e.code === 'KeyD'){
+        next_elements[0].click();
+    }
+    if (e.code === 'KeyA'){
+        prev_elements[0].click();
+    }
 }
 window.addEventListener("keydown", keyListener);
 
