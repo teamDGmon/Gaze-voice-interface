@@ -2176,6 +2176,7 @@ var magnified = false;
 var scale = 1;
 var scroll_x = 0;
 var scroll_y = 0;
+var outer_scroll = 0;
 var links_objects = [];
 var prev_elements = [];
 var next_elements = [];
@@ -2275,12 +2276,20 @@ recognition.addEventListener("result",(e)=> {
                 }
                 document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+(scroll_y-1) * 500+move).toString()+'px';
             }
+            else{
+                outer_scroll = Math.min(outer_scroll+500, document.body.scrollHeight);
+                window.scrollTo(0, outer_scroll);
+            }
         }
         else if (result == '위로'){
             window.scrollBy({top : -500,behavior : "smooth"});
             if(magnified){
                 if(scroll_y > 0) scroll_y--;
                 document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+scroll_y * 500).toString()+'px';
+            }
+            else {
+                outer_scroll = Math.max(outer_scroll-500, 0);
+                window.scrollTo(0, outer_scroll);
             }
         }
         else if (result == '뒤로'){
@@ -2907,10 +2916,14 @@ function keyListener(e){
         prev_elements[0].click();
     }
     if (e.code === 'ControlLeft'){
-        simpleZoomIn();
+        //simpleZoomIn();
+        outer_scroll = Math.min(outer_scroll+500, document.body.scrollHeight);
+        window.scrollTo(0, outer_scroll);
     }
     if (e.code === 'AltLeft'){
-        simpleZoomOut();
+        //simpleZoomOut();
+        outer_scroll = Math.max(outer_scroll-500, 0);
+        window.scrollTo(0, outer_scroll);
     }
 }
 window.addEventListener("keydown", keyListener);
