@@ -2083,12 +2083,108 @@ class GUIModelExtractor {
         this.screenParsedCallback = callback;
     }
 }
+var setInterfaceTable = function(a,b){
+    // show based on element
+    let table = document.createElement('table');
+    let thead = document.createElement('thead');
+    let tbody = document.createElement('tbody');
+    table.className = 'zoom';
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    table.style.position = 'fixed';
+    table.style.top = (a.ymin-10).toString()+'px';
+    table.style.left = (a.xmin+10).toString()+'px';
+    table.style.backgroundColor = 'gray';
+    table.style.borderCollapse = 'collapse';
+    table.style.borderSpacing = 0;
+    table.style.opacity = 0.7;
+    table.style.width = (a.xmax - a.xmin - 50).toString() + 'px';
+    document.body.appendChild(table);
 
+    let row_1 = document.createElement('tr');
+    let heading_1 = document.createElement('th');
+    heading_1.innerHTML = "음성명령어";
+    let heading_2 = document.createElement('th');
+    heading_2.innerHTML = "클릭";
+    let heading_3 = document.createElement('th');
+    heading_3.innerHTML = "뒤로";
+    let heading_4 = document.createElement('th');
+    heading_4.innerHTML = "앞으로";
+    let heading_5 = document.createElement('th');
+    heading_5.innerHTML = "아웃";
+    let heading_6 = document.createElement('th');
+    heading_6.innerHTML = "아래로";
+    let heading_7 = document.createElement('th');
+    heading_7.innerHTML = "위로";
+    let heading_8 = document.createElement('th');
+    heading_8.innerHTML = "왼쪽으로";
+    let heading_9 = document.createElement('th');
+    heading_9.innerHTML = "오른쪽으로";
+    let heading_10 = document.createElement('th');
+    heading_10.innerHTML = "n번째로";
+    row_1.appendChild(heading_1);
+    row_1.appendChild(heading_2);
+    row_1.appendChild(heading_3);
+    row_1.appendChild(heading_4);
+    row_1.appendChild(heading_5);
+    row_1.appendChild(heading_6);
+    row_1.appendChild(heading_7);
+    row_1.appendChild(heading_8);
+    row_1.appendChild(heading_9);
+    row_1.appendChild(heading_10);
+    thead.appendChild(row_1);
+
+
+    // Creating and adding data to second row of the table
+    let row_2 = document.createElement('tr');
+    let row_2_data_1 = document.createElement('td');
+    row_2_data_1.innerHTML = "기능";
+    let row_2_data_2 = document.createElement('td');
+    row_2_data_2.innerHTML = "해당 위치 클릭";
+    let row_2_data_3 = document.createElement('td');
+    row_2_data_3.innerHTML = "이전 페이지";
+    let row_2_data_4 = document.createElement('td');
+    row_2_data_4.innerHTML = "다음 페이지";
+    let row_2_data_5 = document.createElement('td');
+    row_2_data_5.innerHTML = "줌 종료";
+    let row_2_data_6 = document.createElement('td');
+    row_2_data_6.innerHTML = "스크롤 아래로";
+    let row_2_data_7 = document.createElement('td');
+    row_2_data_7.innerHTML = "스크롤 위로";
+    let row_2_data_8 = document.createElement('td');
+    row_2_data_8.innerHTML = "스크롤 왼쪽으로";
+    let row_2_data_9 = document.createElement('td');
+    row_2_data_9.innerHTML = "스크롤 오른쪽으로";
+    let row_2_data_10 = document.createElement('td');
+    row_2_data_10.innerHTML = "n번째 링크로(최대"+b.toString()+')';
+    row_2.appendChild(row_2_data_1);
+    row_2.appendChild(row_2_data_2);
+    row_2.appendChild(row_2_data_3);
+    row_2.appendChild(row_2_data_4);
+    row_2.appendChild(row_2_data_5);
+    row_2.appendChild(row_2_data_6);
+    row_2.appendChild(row_2_data_7);
+    row_2.appendChild(row_2_data_8);
+    row_2.appendChild(row_2_data_9);
+    row_2.appendChild(row_2_data_10);
+    tbody.appendChild(row_2);
+    
+}
 let screenRoot = new SegmentedScreen();
 var targetGUIElements = []; //타겟 엘리먼트 최근에 본 걸로 저장
 var magnified = false;
 var scale = 1;
-
+var scroll_x = 0;
+var scroll_y = 0;
+var links_objects = [];
+function find_search(){
+    var length = screenRoot.childSegments.length;
+    for(var i=0;i<length;i++){
+        if(screenRoot.childSegments[i].constructor.name == 'SearchSegment'){
+            return i;
+        }
+    }
+}
 //특정 좌표 클릭하는 함수
 function left_click(x,y){
     jQuery(document.elementFromPoint(x,y)).click();
@@ -2101,7 +2197,7 @@ var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecgoniti
 var SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
 var SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecgonitionEvent;
 var recognition = new webkitSpeechRecognition();
-const interfaces = ['left','right','down','up', 'zoom', 'out'];
+const interfaces = ['왼쪽으로','오른쪽으로','클릭','아래로', '위로', '뒤로','앞으로','줌','첫번째로','두번쨰로','세번째로'];
 const grammar = '#JSFG V1.0; grammar interfaces; public <interface> = ' + interfaces.join(' | ') + ' ;';
 var speechRecognitionList = new webkitSpeechGrammarList();
 speechRecognitionList.addFromString(grammar,1);
@@ -2116,22 +2212,54 @@ recognition.addEventListener("result",(e)=> {
     console.log("결과 : " + result);
     if(targetGUIElements){
         //var target_center = {x:(targetGUIElements[0].matchedNodeRect.xmax+targetGUIElements[0].matchedNodeRect.xmin)*0.5,y:(targetGUIElements[0].matchedNodeRect.ymax+targetGUIElements[0].matchedNodeRect.ymin)*0.5};
-        if(result == '레프트'){
+        if(result == '왼쪽으로'){
+            window.scrollBy({left : -500,behavior : "smooth"});
+            if(magnified){
+                if(scroll_x > 0) scroll_x--;
+                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+scroll_x * 500).toString()+'px';
+            }
         }
-        else if (result == '라이트'){
-        }
-        else if (result == '업'){
-        }
-        else if (result == '다운'){
+        else if (result == '오른쪽으로'){
+            window.scrollBy({left : 500,behavior : "smooth"});
+            if(magnified){
+                var scroll_locationW = document.documentElement.scrollWidth;
+                var window_width = window.innerWidth;
+                var fullWidth = document.body.scrollWidth;
+                var move = 500;
+                if(scroll_locationW + window_width >= fullWidth) {
+                    move = 500 + fullWidth - (scroll_locationW + window_width);
+                }
+                else{
+                    scroll_x++;
+                }
+                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x-1) * 500+move).toString()+'px';
+            }
         }
         else if (result == '클릭'){
             left_click(gaze_x,gaze_y);
         }
-        else if (result == '페이지 다운'){
-            window.scrollTo({left:gaze_x, top : gaze_y+500/scale,behavior : "smooth"});
+        else if (result == '아래로'){
+            window.scrollBy({top : 500,behavior : "smooth"});
+            if(magnified){
+                var scroll_locationH = document.documentElement.scrollHeight;
+                var window_height = window.innerHeight;
+                var fullHeight = document.body.scrollHeight;
+                var move = 500;
+                if(scroll_locationH + window_height >= fullHeight) {
+                    move = 500 + fullHeight - (scroll_locationH + window_height);
+                }
+                else{
+                    scroll_y++;
+                }
+                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+(scroll_y-1) * 500+move).toString()+'px';
+            }
         }
-        else if (result == '페이지 업'){
-            window.scrollTo({left:gaze_x, top : gaze_y-500/scale,behavior : "smooth"});
+        else if (result == '위로'){
+            window.scrollBy({top : -500,behavior : "smooth"});
+            if(magnified){
+                if(scroll_y > 0) scroll_y--;
+                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+scroll_y * 500).toString()+'px';
+            }
         }
         else if (result == '뒤로'){
             window.history.go(-1);
@@ -2139,16 +2267,20 @@ recognition.addEventListener("result",(e)=> {
         else if (result == '앞으로'){
             window.history.go(1);
         }
-        else if (result == '줌'){
+        else if (result == '줌' || result =='춤'){
             if (targetGUIElements.length > 0 && !magnified){
                 magnified = true;
+                targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
                 /*
                 for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                     targetGUIElements[i].matchedNode.style.border = null;
                 }*/
                 targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
-                console.log(targetGUIElements[targetGUIElementsIndex].matchedNode);
-                console.log()
+                
+                links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
+                
+                console.log(links_objects.length);
+                setInterfaceTable(targetGUIElements[targetGUIElementsIndex].matchedNodeRect,links_objects.length);
                 zoom.to({
                     element: (targetGUIElements[targetGUIElementsIndex].matchedNode),
                     // Zoom 수행 이후 불려지는 callback 함수
@@ -2162,7 +2294,46 @@ recognition.addEventListener("result",(e)=> {
         }
         else if (result == '아웃'){
             magnified = false;
+            document.getElementsByClassName('zoom')[0].remove();
+            scroll_x = 0;
+            scroll_y = 0;
+            links_objects = [];
             zoom.out();
+        }
+        else if (result == '첫 번째로'){
+            if(magnified && links_objects){
+                var rect = links_objects[0].matchedNodeRect;
+                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+            }
+        }
+        else if (result == '두 번째로'){
+            if(magnified && links_objects && links_objects.length >1){
+                var rect = links_objects[1].matchedNodeRect;
+                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+            }
+        }
+        else if (result == '세 번째로'){
+            if(magnified && links_objects && links_objects.length >2){
+                var rect = links_objects[2].matchedNodeRect;
+                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+            }
+        }
+        else if (result.split(' ')[0] == '검색'){
+            console.log(screenRoot.childSegments[find_search()]);
+            var search_node = screenRoot.childSegments[find_search()].searchInputNode;
+            if(magnified && targetGUIElements[targetGUIElements.length-1].constructor.name == 'searchSegment' ){
+                search_node = targetGUIElements[targetGUIElements.length-1].searchInputNode;
+            }
+            else if(magnified && targetGUIElements[targetGUIElements.length-1].constructor.name != 'searchSegment' ){
+                search_node = null;
+            }
+            if(search_node){
+                console.log(search_node);
+                search_node.value = result.slice(3);
+                const handler = new DefaultEventHandler();
+                handler.dispatchPointClick(screenRoot.childSegments[find_search()].matchedNodeRect);
+                handler.dispatchEnterInput();
+            }
         }
     }
 });
@@ -2172,7 +2343,12 @@ recognition.start();
 function getTarget(){
     var loca = {x:gaze_x,y:gaze_y};
     var temp = screenRoot.segmentsFromPoint(loca.x,loca.y);
+    if (targetGUIElements.length == 0){
+        targetGUIElements = temp;
+    }
     if(temp.length != 0){
+        targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
+        temp[temp.length-1].matchedNode.style.boxShadow = '0 0 0 2px red inset';
         targetGUIElements = temp;
     }
 }
@@ -2213,11 +2389,35 @@ function initWebGazer() {
         const offset_x = Math.abs(data.x - prevGazePoint.x)
         const offset_y = Math.abs(data.y - prevGazePoint.y)
         if (offset_x < screenSize.width * gazeMoveThreshold && offset_y < screenSize.height * gazeMoveThreshold) return  // smoothing
-        gaze_x = data.x
-        gaze_y = data.y
+        if (magnified){
+            var element_xmin = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin;
+            var element_xmax = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmax;
+            var element_width = element_xmax - element_xmin;
+            var element_ymin = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin;
+            var element_ymax = targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymax;
+            var element_height = element_ymax - element_ymin;
+            var scale = 1.0;
+            gaze_x = element_xmin + element_width/window.innerWidth*data.x;
+            gaze_y = element_ymin + element_width/window.innerWidth*data.y;
+            if (element_width >= window.innerWidth) {
+                scale = Math.max(window.innerHeight / element_height, 1);
+            }else if (element_height >= window.innerHeight){
+                scale = Math.max(window.innerWidth / element_width, 1);
+            }else{
+                scale = Math.max(Math.min(window.innerWidth / element_width, window.innerHeight / element_height), 1);
+            }
+            gaze_x = element_xmin + data.x/scale;
+            gaze_y = element_ymin + data.y/scale;
+            pointer.style.width = String(10/scale) + 'px'
+            pointer.style.height = String(10/scale) + 'px'
+        }
+        else {
+            gaze_x = data.x
+            gaze_y = data.y
+        }
         pointer.style.transform = `translate3d(${gaze_x}px, ${gaze_y}px, 0px)`
-        prevGazePoint.x = gaze_x
-        prevGazePoint.y = gaze_y
+        prevGazePoint.x = data.x
+        prevGazePoint.y = data.y
     }).showPredictionPoints(false).begin()
 }
 function calibrateWebGazer() {
@@ -2274,6 +2474,7 @@ var eyeData = [];
 var runs = 0;
 
 var targetGUIElementsIndex = 0;
+const screenParser = new GUIModelExtractor();
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     switch (request.method) {
         case "startParse": { // Need to parse
@@ -2284,7 +2485,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             let prevActionTarget = null;
             if (request.params.prevActionTarget) prevActionTarget = request.params.prevActionTarget;
 
-            const screenParser = new GUIModelExtractor();
 
             screenParser.onScreenParsed(function (segment_objects, segmentedScreen) {
 
@@ -2454,7 +2654,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
             })();
 
             screenParser.parseGUIScreen(detections, screen_width, screen_height, prevActionTarget);
-
+            setOutterButton()
             break;
         }
 
@@ -2472,135 +2672,77 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     }
 });
 
+var setButtonElement = function(top, left, str){
+    var tmpElement = document.createElement('div');
+    var tmpButton = document.createElement('div');
+    var tmpstr = document.createElement('div');
+    tmpstr.textContent = str
+    tmpButton.style.display = 'inline-block';
+    tmpButton.style.border = '40px solid transparent';
+    tmpButton.style.borderLeftColor = 'red';
+    tmpElement.appendChild(tmpButton)
+    tmpElement.appendChild(tmpstr)
+    tmpElement.style.position = 'fixed';
+    tmpElement.style.top = top;
+    tmpElement.style.left = left;
+    tmpElement.style.border = '1px solid red'
+    tmpElement.style.borderRadius = '20px'
+    return tmpElement
+}
 
-document.addEventListener('DOMContentLoaded', function(event) {
-    zoom = (function () {
-        var TRANSITION_DURATION = 50;
-        var level = 1;
-        var panEngageTimeout = -1,
-            panUpdateInterval = -1;
-        var callbackTimeout = -1;
-        var supportsTransforms = 'WebkitTransform' in document.body.style || 'MozTransform' in document.body.style || 'msTransform' in document.body.style || 'OTransform' in document.body.style || 'transform' in document.body.style;
-        if (supportsTransforms) {
-            document.body.style.transition = 'transform ' + TRANSITION_DURATION + 'ms ease';
-            document.body.style.OTransition = '-o-transform ' + TRANSITION_DURATION + 'ms ease';
-            document.body.style.msTransition = '-ms-transform ' + TRANSITION_DURATION + 'ms ease';
-            document.body.style.MozTransition = '-moz-transform ' + TRANSITION_DURATION + 'ms ease';
-            document.body.style.WebkitTransition = '-webkit-transform ' + TRANSITION_DURATION + 'ms ease';
-        }
-        function magnify(rect, scale) {
-            console.log("magnify")
-            var scrollOffset = getScrollOffset();
-            rect.width = rect.width || 1;
-            rect.height = rect.height || 1;
-            rect.x -= (window.innerWidth - (rect.width * scale)) / 2;
-            //rect.y -= (window.innerHeight - (rect.height * scale)) / 2;
-            if (supportsTransforms) {
-                // Reset
-                if (scale === 1) {
-                    document.body.style.transform = '';
-                    document.body.style.OTransform = '';
-                    document.body.style.msTransform = '';
-                    document.body.style.MozTransform = '';
-                    document.body.style.WebkitTransform = '';
-                }
-                // Scale
-                else {
-                    var origin = scrollOffset.x + 'px ' + scrollOffset.y + 'px',
-                        transform = 'translate(' + -rect.x + 'px,' + -rect.y + 'px) scale(' + scale + ')';
-    
-                    document.body.style.transformOrigin = origin;
-                    document.body.style.OTransformOrigin = origin;
-                    document.body.style.msTransformOrigin = origin;
-                    document.body.style.MozTransformOrigin = origin;
-                    document.body.style.WebkitTransformOrigin = origin;
-    
-                    document.body.style.transform = transform;
-                    document.body.style.OTransform = transform;
-                    document.body.style.msTransform = transform;
-                    document.body.style.MozTransform = transform;
-                    document.body.style.WebkitTransform = transform;
-                }
-            }
-            else {
-                // Reset
-                if (scale === 1) {
-                    document.body.style.position = '';
-                    document.body.style.left = '';
-                    document.body.style.top = '';
-                    document.body.style.width = '';
-                    document.body.style.height = '';
-                    document.body.style.zoom = '';
-                }
-                // Scale
-                else {
-                    document.body.style.position = 'relative';
-                    document.body.style.left = (- (scrollOffset.x + rect.x) / scale) + 'px';
-                    document.body.style.top = (- (scrollOffset.y + rect.y) / scale) + 'px';
-                    document.body.style.width = (scale * 100) + '%';
-                    document.body.style.height = (scale * 100) + '%';
-                    document.body.style.zoom = scale;
-                }
-            }
-    
-            level = scale;
-        }
-        function getScrollOffset() {
-            return {
-                x: window.scrollX !== undefined ? window.scrollX : window.pageXOffset,
-                y: window.scrollY !== undefined ? window.scrollY : window.pageYOffset
-            }
-        }
-        return {
-            to: function (options) {
-                console.log("get into zoom.to")
-                console.log(level)
-                console.log(options)
-                if (level !== 1) {
-                    zoom.out();
-                }
-                else {
-                    options.x = options.x || 0;
-                    options.y = options.y || 0;
-                    if (!!options.element) {
-                        var padding = typeof options.padding === 'number' ? options.padding : 20;
-                        var bounds = options.element.getBoundingClientRect();
-                        options.x = bounds.left - padding;
-                        options.y = bounds.top - padding;
-                        options.width = bounds.width + (padding * 2);
-                        options.height = bounds.height + (padding * 2);
-                    }
-                    if (options.width !== undefined && options.height !== undefined) {
-                        options.scale = Math.max(Math.min(window.innerWidth / options.width, window.innerHeight / options.height), 1);
-                    }
-                    if (options.scale > 1) {
-                        options.x *= options.scale;
-                        options.y *= options.scale;
-                        options.x = Math.max(options.x, 0);
-                        options.y = Math.max(options.y, 0);
-                        magnify(options, options.scale);
-                        if (typeof options.callback === 'function') {
-                            callbackTimeout = setTimeout(options.callback, TRANSITION_DURATION);
-                        }
-                    }
-                }
-            },
-            out: function (options) {
-                clearTimeout(panEngageTimeout);
-                clearInterval(panUpdateInterval);
-                clearTimeout(callbackTimeout);
-                magnify({ x: 0, y: 0 }, 1);
-                level = 1;
-            },
-            magnify: function (options) { this.to(options) },
-            reset: function () { this.out() },
-            zoomLevel: function () {
-                return level;
-            }
-        }
-    
-    })();
-  });
+
+var setOutterButton = function(){
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    var arrow = chrome.runtime.getURL('image/arrow.png')
+
+    // show based on element
+    var leftElement = document.createElement('div');
+    var leftButton = document.createElement('img');
+    var leftstr = document.createElement('div');
+    leftstr.textContent = 'Left';
+    leftstr.style.textAlign = 'center';
+    leftstr.style.borderBottom = '5px'
+    leftButton.src = arrow;
+    leftButton.style.width = '40px';
+    leftButton.style.transform = 'rotate(180deg)';
+    leftButton.style.WebkitTransform = 'rotate(180deg)';
+    leftButton.style.margin = '0 auto';
+    leftButton.style.display = 'block';
+    leftElement.appendChild(leftButton);
+    leftElement.appendChild(leftstr);
+    leftElement.style.position = 'fixed';
+    leftElement.style.top = '300px';
+    leftElement.style.left = '20px';
+    leftElement.style.border = '1px solid black';
+    leftElement.style.width = '60px'
+    leftElement.style.height = '60px'
+    leftElement.style.borderRadius = '5px';
+    document.body.appendChild(leftElement)
+
+    var rightElement = document.createElement('div');
+    var rightButton = document.createElement('img');
+    var rightstr = document.createElement('div');
+    rightstr.textContent = 'Right';
+    rightstr.style.textAlign = 'center';
+    rightstr.style.borderBottom = '5px'
+    rightButton.src = arrow;
+    rightButton.style.width = '40px';
+    rightButton.style.margin = '0 auto';
+    rightButton.style.display = 'block';
+    rightElement.appendChild(rightButton);
+    rightElement.appendChild(rightstr);
+    rightElement.style.position = 'fixed';
+    rightElement.style.top = '300px';
+    rightElement.style.left = '90px';
+    rightElement.style.border = '1px solid black';
+    rightElement.style.width = '60px'
+    rightElement.style.height = '60px'
+    rightElement.style.borderRadius = '5px';
+    document.body.appendChild(rightElement)
+}
+
 
 function keyListener(e){
     if (e.code === 'Escape'){
@@ -2615,6 +2757,7 @@ function keyListener(e){
             for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                 targetGUIElements[i].matchedNode.style.border = null;
             }*/
+            targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
             targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
 
             zoom.to({
