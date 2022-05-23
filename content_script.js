@@ -2584,6 +2584,55 @@ var setOutterButton = function(){
     document.body.appendChild(rightElement)
 }
 
+function findButtons(){
+    var element_buttons = targetGUIElements[targetGUIElements.length-1].matchedNode.getElementsByTagName('button')
+    var element_as = targetGUIElements[targetGUIElements.length-1].matchedNode.getElementsByTagName('a')
+
+    var prev_elements = [];
+    var next_elements = [];
+    for (var i = 0 ; i < element_buttons.length; i++){
+        var tmp_attributes = element_buttons[i].attributes;
+        var check_attri_prev = false;
+        var check_attri_next = false;
+        for (var j = 0; j < tmp_attributes.length; j++){
+            if (tmp_attributes[j].value.includes('prev')){
+                check_attri_prev = true;
+            }
+            else if (tmp_attributes[j].value.includes('next')){
+                check_attri_next = true;
+            }
+        }
+        if (check_attri_prev){
+            prev_elements.push(element_buttons[i]);
+        }
+        if (check_attri_next){
+            next_elements.push(element_buttons[i]);
+        }
+    }
+    for (var i = 0 ; i < element_as.length; i++){
+        var tmp_attributes = element_as[i].attributes;
+        var check_attri_prev = false;
+        var check_attri_next = false;
+        for (var j = 0; j < tmp_attributes.length; j++){
+            if (tmp_attributes[j].value.includes('prev')){
+                check_attri_prev = true;
+            }
+            else if (tmp_attributes[j].value.includes('next')){
+                check_attri_next = true;
+            }
+        }
+        if (check_attri_prev){
+            prev_elements.push(element_as[i]);
+        }
+        if (check_attri_next){
+            next_elements.push(element_as[i]);
+        }
+    }
+    console.log(prev_elements);
+    console.log(next_elements);
+}
+
+
 
 function keyListener(e){
     if (e.code === 'Escape'){
@@ -2605,6 +2654,7 @@ function keyListener(e){
                 element: (targetGUIElements[targetGUIElementsIndex].matchedNode),
                 // Zoom 수행 이후 불려지는 callback 함수
                 callback: function () {
+                    findButtons();
                     console.log("after zooming!");
                     // Do something
                 }
