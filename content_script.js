@@ -2277,7 +2277,7 @@ recognition.addEventListener("result",(e)=> {
                 }*/
                 targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
                 
-                links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
+                if(targetGUIElements[targetGUIElementsIndex].navCollection.navItems) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
                 
                 console.log(links_objects.length);
                 setInterfaceTable(targetGUIElements[targetGUIElementsIndex].matchedNodeRect,links_objects.length);
