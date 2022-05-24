@@ -2216,7 +2216,10 @@ var magnified = false;
 var scale = 1;
 var scroll_x = 0;
 var scroll_y = 0;
+var outer_scroll = 0;
 var links_objects = [];
+var prev_elements = [];
+var next_elements = [];
 function find_search(){
     var length = screenRoot.childSegments.length;
     for(var i=0;i<length;i++){
@@ -2231,6 +2234,12 @@ function left_click(x,y){
 }
 var zoom = function() {
     console.log("zoom is not initialized yet");
+};
+var simpleZoomIn = function() {
+    console.log("simple zoom is not initialized yet");
+};
+var simpleZoomOut = function() {
+    console.log("simple zoom is not initialized yet");
 };
 //SpeechRecognition 시작
 var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecgonition;
@@ -2267,6 +2276,24 @@ recognition.addEventListener("result",(e)=> {
                 document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x) * 500/scale).toString()+'px';
             }
         }
+        // 여기서 부터 새로 추가
+        else if (result == '이전'){
+            for (var i = 0; i < prev_elements.length; i++){
+                prev_elements[i].click();
+            }
+        }
+        else if (result == '다음'){
+            for (var i = 0; i < next_elements.length; i++){
+                next_elements[i].click();
+            }
+        }
+        else if (result == '확대'){
+            simpleZoomIn();
+        }
+        else if (result == '축소'){
+            simpleZoomOut();
+        }
+        // 여기까지
         else if (result == '클릭'){
             left_click(gaze_x,gaze_y);
         }
@@ -2278,6 +2305,10 @@ recognition.addEventListener("result",(e)=> {
                 console.log(scroll_y);
                 document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+(scroll_y) * 500/scale).toString()+'px';
             }
+            else{
+                outer_scroll = Math.min(outer_scroll+500, document.body.scrollHeight);
+                window.scrollTo(0, outer_scroll);
+            }
         }
         else if (result == '위로'){
             window.scrollBy({top : -500,behavior : "smooth"});
@@ -2285,6 +2316,10 @@ recognition.addEventListener("result",(e)=> {
                 if(scroll_y > 0) scroll_y--;
                 console.log(scroll_y);
                 document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+scroll_y * 500/scale).toString()+'px';
+            }
+            else {
+                outer_scroll = Math.max(outer_scroll-500, 0);
+                window.scrollTo(0, outer_scroll);
             }
         }
         else if (result == '뒤로'){
@@ -2296,7 +2331,7 @@ recognition.addEventListener("result",(e)=> {
         else if (result == '줌' || result =='춤'){
             if (targetGUIElements.length > 0 && !magnified){
                 magnified = true;
-                targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
+                targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
                 /*
                 for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                     targetGUIElements[i].matchedNode.style.border = null;
@@ -2402,18 +2437,21 @@ recognition.start();
 function getTarget(){
     var loca = {x:gaze_x,y:gaze_y};
     var temp = screenRoot.segmentsFromPoint(loca.x,loca.y);
-    if (targetGUIElements.length == 0){
-        targetGUIElements = temp;
-    }
     if(temp.length != 0){
-        targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
-        temp[temp.length-1].matchedNode.style.boxShadow = '0 0 0 2px red inset';
+        if (targetGUIElements.length != 0){
+            targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
+        }
+        temp[temp.length-1].matchedNode.style.boxSizing = 'border-box';
+        temp[temp.length-1].matchedNode.style.border = 'solid red';
         targetGUIElements = temp;
+        findButtons();
     }
 }
 
 // WebGazer 시작
-var gaze_x = 0, gaze_y = 0
+var gaze_x = 0, gaze_y = 0;
+var simple_x = 0, simple_y = 0; // save simpleZoom center point's coordinate
+var simple_magnified = false;
 const prevGazePoint = {
     x: 0,
     y: 0
@@ -2467,12 +2505,22 @@ function initWebGazer() {
             }
             gaze_x = element_xmin + data.x/scale;
             gaze_y = element_ymin + data.y/scale;
-            pointer.style.width = String(10/scale) + 'px'
-            pointer.style.height = String(10/scale) + 'px'
+            pointer.style.width = String(10/scale) + 'px';
+            pointer.style.height = String(10/scale) + 'px';
         }
         else {
-            gaze_x = data.x
-            gaze_y = data.y
+            if (simple_magnified){
+                gaze_x = simple_x - window.innerWidth/4 + data.x/2;
+                gaze_y = simple_y - window.innerHeight/4 + data.y/2;
+                pointer.style.width = '5px';
+                pointer.style.height = '5px';
+            }
+            else {
+                gaze_x = data.x;
+                gaze_y = data.y;
+                pointer.style.width = '10px';
+                pointer.style.height = '10px';
+            }
         }
         pointer.style.transform = `translate3d(${gaze_x}px, ${gaze_y}px, 0px)`
         prevGazePoint.x = data.x
@@ -2569,6 +2617,34 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
                 // initSeamlisInterfaces();
             });
+            simpleZoomIn = function(){
+                if (gaze_x - window.innerWidth/4 > 0){
+                    document.body.style.left = -(gaze_x - window.innerWidth/4) + 'px';
+                    simple_x = gaze_x;
+                }
+                else {
+                    document.body.style.left = '0px';
+                    simple_x = window.innerWidth/4;
+                }
+                if (gaze_y - window.innerHeight/4 > 0){
+                    document.body.style.top = -(gaze_y - window.innerHeight/4) + 'px';
+                    simple_y = gaze_y;
+                }
+                else {
+                    document.body.style.top = '0px';
+                    simple_y = window.innerHeight/4;
+                }
+                document.body.style.zoom = 2;
+                document.body.style.position = 'relative';
+                simple_magnified = true;
+            }
+            simpleZoomOut = function(){
+                document.body.style.zoom = 1;
+                document.body.style.left = '';
+                document.body.style.top = '';
+                document.body.style.position = '';
+                simple_magnified = false;
+            }
 
             zoom = (function () {
                 var TRANSITION_DURATION = 50;
@@ -2802,6 +2878,99 @@ var setOutterButton = function(){
     document.body.appendChild(rightElement)
 }
 
+function findButtons(){
+    var element_buttons = targetGUIElements[targetGUIElements.length-1].matchedNode.getElementsByTagName('button')
+    var element_as = targetGUIElements[targetGUIElements.length-1].matchedNode.getElementsByTagName('a')
+
+    prev_elements = [];
+    next_elements = [];
+    for (var i = 0 ; i < element_buttons.length; i++){
+        var tmp_attributes = element_buttons[i].attributes;
+        var check_attri_prev = false;
+        var check_attri_next = false;
+        for (var j = 0; j < tmp_attributes.length; j++){
+            if (tmp_attributes[j].value.includes('prev')){
+                check_attri_prev = true;
+            }
+            else if (tmp_attributes[j].value.includes('이전')){
+                check_attri_prev = true;
+            }
+            else if (tmp_attributes[j].value.includes('next')){
+                check_attri_next = true;
+            }
+            else if (tmp_attributes[j].value.includes('다음')){
+                check_attri_next = true;
+            }
+        }
+        if (!check_attri_prev && !check_attri_next){
+            for (var ii = 0; ii < element_buttons[i].childNodes.length; ii++){
+                var tmp_text = element_buttons[i].childNodes[ii].textContent;
+                if (tmp_text.includes('prev')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('이전')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('next')){
+                    check_attri_next = true;
+                }
+                else if (tmp_text.includes('다음')){
+                    check_attri_next = true;
+                }
+            }
+        }
+        if (check_attri_prev){
+            prev_elements.push(element_buttons[i]);
+        }
+        if (check_attri_next){
+            next_elements.push(element_buttons[i]);
+        }
+    }
+    for (var i = 0 ; i < element_as.length; i++){
+        var tmp_attributes = element_as[i].attributes;
+        var check_attri_prev = false;
+        var check_attri_next = false;
+        for (var j = 0; j < tmp_attributes.length; j++){
+            if (tmp_attributes[j].value.includes('prev')){
+                check_attri_prev = true;
+            }
+            else if (tmp_attributes[j].value.includes('이전')){
+                check_attri_prev = true;
+            }
+            else if (tmp_attributes[j].value.includes('next')){
+                check_attri_next = true;
+            }
+            else if (tmp_attributes[j].value.includes('다음')){
+                check_attri_next = true;
+            }
+        }
+        if (!check_attri_prev && !check_attri_next){
+            for (var ii = 0; ii < element_as[i].childNodes.length; ii++){
+                var tmp_text = element_as[i].childNodes[ii].textContent;
+                if (tmp_text.includes('prev')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('이전')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('next')){
+                    check_attri_next = true;
+                }
+                else if (tmp_text.includes('다음')){
+                    check_attri_next = true;
+                }
+            }
+        }
+        if (check_attri_prev){
+            prev_elements.push(element_as[i]);
+        }
+        if (check_attri_next){
+            next_elements.push(element_as[i]);
+        }
+    }
+}
+
+
 
 function keyListener(e){
     if (e.code === 'Escape'){
@@ -2816,13 +2985,14 @@ function keyListener(e){
             for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
                 targetGUIElements[i].matchedNode.style.border = null;
             }*/
-            targetGUIElements[targetGUIElements.length-1].matchedNode.style.boxShadow = null;
+            targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
             targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
 
             zoom.to({
                 element: (targetGUIElements[targetGUIElementsIndex].matchedNode),
                 // Zoom 수행 이후 불려지는 callback 함수
                 callback: function () {
+                    findButtons();
                     console.log("after zooming!");
                     // Do something
                 }
@@ -2830,18 +3000,28 @@ function keyListener(e){
  
         }
     }
-    // if (e.code === 'KeyD'){
-    //     if (modalOpened && gazedGUIElementIndex < gazedGUIElements.length-1){
-    //         gazedGUIElementIndex += 1;
-    //         magnify(gazedGUIElements[gazedGUIElementIndex].matchedNode);
-    //     }
-    // }
-    // if (e.code === 'KeyA'){
-    //     if (modalOpened && gazedGUIElementIndex > 0){
-    //         gazedGUIElementIndex -= 1;
-    //         magnify(gazedGUIElements[gazedGUIElementIndex].matchedNode);
-    //     }
-    // }
+    if (e.code === 'KeyD'){
+        console.log(next_elements);
+        for (var i = 0; i < next_elements.length; i++){
+            next_elements[i].click();
+        }
+    }
+    if (e.code === 'KeyA'){
+        console.log(prev_elements);
+        for (var i = 0; i < prev_elements.length; i++){
+            prev_elements[i].click();
+        }
+    }
+    if (e.code === 'ControlLeft'){
+        //simpleZoomIn();
+        outer_scroll = Math.min(outer_scroll+500, document.body.scrollHeight);
+        window.scrollTo(0, outer_scroll);
+    }
+    if (e.code === 'AltLeft'){
+        //simpleZoomOut();
+        outer_scroll = Math.max(outer_scroll-500, 0);
+        window.scrollTo(0, outer_scroll);
+    }
 }
 window.addEventListener("keydown", keyListener);
 
