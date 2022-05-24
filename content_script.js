@@ -2246,10 +2246,14 @@ recognition.addEventListener("result",(e)=> {
         }
         // 여기서 부터 새로 추가
         else if (result == '이전'){
-            prev_elements[0].click();
+            for (var i = 0; i < prev_elements.length; i++){
+                prev_elements[i].click();
+            }
         }
         else if (result == '다음'){
-            next_elements[0].click();
+            for (var i = 0; i < next_elements.length; i++){
+                next_elements[i].click();
+            }
         }
         else if (result == '확대'){
             simpleZoomIn();
@@ -2957,11 +2961,15 @@ function keyListener(e){
     }
     if (e.code === 'KeyD'){
         console.log(next_elements);
-        next_elements[0].click();
+        for (var i = 0; i < next_elements.length; i++){
+            next_elements[i].click();
+        }
     }
     if (e.code === 'KeyA'){
         console.log(prev_elements);
-        prev_elements[0].click();
+        for (var i = 0; i < prev_elements.length; i++){
+            prev_elements[i].click();
+        }
     }
     if (e.code === 'ControlLeft'){
         //simpleZoomIn();
