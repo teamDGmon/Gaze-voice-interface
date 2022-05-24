@@ -2127,12 +2127,15 @@ var setInterfaceTable = function(a,b){
     heading_5.innerHTML = "아웃";
     let heading_6 = document.createElement('th');
     heading_6.innerHTML = "아래로";
+    let row_1_data = document.createElement('th');
+    row_1_data.innerHTML = "이전";
     row_1.appendChild(heading_1);
     row_1.appendChild(heading_2);
     row_1.appendChild(heading_3);
     row_1.appendChild(heading_4);
     row_1.appendChild(heading_5);
     row_1.appendChild(heading_6);
+    row_1.appendChild(row_1_data);
     thead.appendChild(row_1);
 
 
@@ -2150,12 +2153,15 @@ var setInterfaceTable = function(a,b){
     row_2_data_5.innerHTML = "줌 종료";
     let row_2_data_6 = document.createElement('td');
     row_2_data_6.innerHTML = "스크롤<br>아래로";
+    let row_2_data_7 = document.createElement('td');
+    row_2_data_7.innerHTML = "화살표 등 <br>이전 컨텐츠";
     row_2.appendChild(row_2_data_1);
     row_2.appendChild(row_2_data_2);
     row_2.appendChild(row_2_data_3);
     row_2.appendChild(row_2_data_4);
     row_2.appendChild(row_2_data_5);
     row_2.appendChild(row_2_data_6);
+    row_2.appendChild(row_2_data_7);
     tbody.appendChild(row_2);
     
     let row_3 = document.createElement('tr');
@@ -2209,6 +2215,40 @@ var setInterfaceTable = function(a,b){
     row_4.appendChild(row_4_data_11);
     row_4.appendChild(row_4_data_12);
     tbody.appendChild(row_4);
+
+    let row_5 = document.createElement('tr');
+
+    let row_5_data = document.createElement('td');
+    row_5_data.innerHTML = "음성명령어";
+    let row_5_data_1 = document.createElement('td');
+    row_5_data_1.innerHTML = "다음";
+    let row_5_data_2 = document.createElement('td');
+    row_5_data_2.innerHTML = "확대";
+    let row_5_data_3 = document.createElement('td');
+    row_5_data_3.innerHTML = "축소";
+    
+    row_5.appendChild(row_5_data);
+    row_5.appendChild(row_5_data_1);
+    row_5.appendChild(row_5_data_2);
+    row_5.appendChild(row_5_data_3);
+    tbody.appendChild(row_5);
+
+    let row_6 = document.createElement('tr');
+
+    let row_6_data = document.createElement('td');
+    row_6_data.innerHTML = "기능";
+    let row_6_data_1 = document.createElement('td');
+    row_6_data_1.innerHTML = "화살표 등 <br>다음 컨텐츠";
+    let row_6_data_2 = document.createElement('td');
+    row_6_data_2.innerHTML ="단순 확대";
+    let row_6_data_3 = document.createElement('td');
+    row_6_data_3.innerHTML = "단순 축소";
+    
+    row_6.appendChild(row_6_data);
+    row_6.appendChild(row_6_data_1);
+    row_6.appendChild(row_6_data_2);
+    row_6.appendChild(row_6_data_3);
+    tbody.appendChild(row_6);
 }
 let screenRoot = new SegmentedScreen();
 var targetGUIElements = []; //타겟 엘리먼트 최근에 본 걸로 저장
