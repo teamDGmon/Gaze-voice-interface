@@ -2284,6 +2284,7 @@ function find_search(){
 }
 //특정 좌표 클릭하는 함수
 function left_click(x,y){
+    console.log(screenRoot.segmentsFromPoint(x, y))
     jQuery(document.elementFromPoint(x,y)).click();
 }
 var zoom = function() {
@@ -2296,197 +2297,200 @@ var simpleZoomOut = function() {
     console.log("simple zoom is not initialized yet");
 };
 //SpeechRecognition 시작
-var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecgonition;
-var SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
-var SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecgonitionEvent;
-var recognition = new webkitSpeechRecognition();
-const interfaces = ['왼쪽으로','오른쪽으로','클릭','아래로', '위로', '뒤로','앞으로','줌','첫번째로','두번쨰로','세번째로'];
-const grammar = '#JSFG V1.0; grammar interfaces; public <interface> = ' + interfaces.join(' | ') + ' ;';
-var speechRecognitionList = new webkitSpeechGrammarList();
-speechRecognitionList.addFromString(grammar,1);
-recognition.grammars = speechRecognitionList;
-recognition.interimResults = false;
-recognition.continuous = false;
+function initSpeechRecognition() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecgonition;
+    var SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+    var SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecgonitionEvent;
+    var recognition = new webkitSpeechRecognition();
+    const interfaces = ['왼쪽으로','오른쪽으로','클릭','아래로', '위로', '뒤로','앞으로','줌','첫번째로','두번쨰로','세번째로'];
+    const grammar = '#JSFG V1.0; grammar interfaces; public <interface> = ' + interfaces.join(' | ') + ' ;';
+    var speechRecognitionList = new webkitSpeechGrammarList();
+    speechRecognitionList.addFromString(grammar,1);
+    recognition.grammars = speechRecognitionList;
+    recognition.interimResults = false;
+    recognition.continuous = false;
 //recognition.lang = 'en-US'; //언어설정
-recognition.maxAlternatives = 1;
-recognition.addEventListener("result",(e)=> {
-    console.log(targetGUIElements);
-    let result = e.results[0][0].transcript;
-    console.log("결과 : " + result);
-    if(targetGUIElements){
-        //var target_center = {x:(targetGUIElements[0].matchedNodeRect.xmax+targetGUIElements[0].matchedNodeRect.xmin)*0.5,y:(targetGUIElements[0].matchedNodeRect.ymax+targetGUIElements[0].matchedNodeRect.ymin)*0.5};
-        if(result == '왼쪽으로'){
-            window.scrollBy({left : -500,behavior : "smooth"});
-            if(magnified){
-                if(scroll_x > 0) scroll_x--;
-                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+scroll_x * 500/scale).toString()+'px';
+    recognition.maxAlternatives = 1;
+    recognition.addEventListener("result",(e)=> {
+        console.log(targetGUIElements);
+        let result = e.results[0][0].transcript;
+        console.log("결과 : " + result);
+        if(targetGUIElements){
+            //var target_center = {x:(targetGUIElements[0].matchedNodeRect.xmax+targetGUIElements[0].matchedNodeRect.xmin)*0.5,y:(targetGUIElements[0].matchedNodeRect.ymax+targetGUIElements[0].matchedNodeRect.ymin)*0.5};
+            if(result == '왼쪽으로'){
+                window.scrollBy({left : -500,behavior : "smooth"});
+                if(magnified){
+                    if(scroll_x > 0) scroll_x--;
+                    document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+scroll_x * 500/scale).toString()+'px';
+                }
             }
-        }
-        else if (result == '오른쪽으로'){
-            window.scrollBy({left : 500,behavior : "smooth"});
-            if(magnified){
-                scroll_x++;
-                
-                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x) * 500/scale).toString()+'px';
+            else if (result == '오른쪽으로'){
+                window.scrollBy({left : 500,behavior : "smooth"});
+                if(magnified){
+                    scroll_x++;
+
+                    document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x) * 500/scale).toString()+'px';
+                }
             }
-        }
-        // 여기서 부터 새로 추가
-        else if (result == '이전'){
-            for (var i = 0; i < prev_elements.length; i++){
-                prev_elements[i].click();
+            // 여기서 부터 새로 추가
+            else if (result == '이전'){
+                for (var i = 0; i < prev_elements.length; i++){
+                    prev_elements[i].click();
+                }
             }
-        }
-        else if (result == '다음'){
-            for (var i = 0; i < next_elements.length; i++){
-                next_elements[i].click();
+            else if (result == '다음'){
+                for (var i = 0; i < next_elements.length; i++){
+                    next_elements[i].click();
+                }
             }
-        }
-        else if (result == '확대'){
-            simpleZoomIn();
-        }
-        else if (result == '축소'){
-            simpleZoomOut();
-        }
-        // 여기까지
-        else if (result == '클릭'){
-            left_click(gaze_x,gaze_y);
-        }
-        else if (result == '아래로'){
-            window.scrollBy({top : 500,behavior : "smooth"});
-            if(magnified){
-                scroll_y++;
-                
-                console.log(scroll_y);
-                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+(scroll_y) * 500/scale).toString()+'px';
+            else if (result == '확대'){
+                simpleZoomIn();
             }
-            else{
-                outer_scroll = Math.min(outer_scroll+500, document.body.scrollHeight);
-                window.scrollTo(0, outer_scroll);
+            else if (result == '축소'){
+                simpleZoomOut();
             }
-        }
-        else if (result == '위로'){
-            window.scrollBy({top : -500,behavior : "smooth"});
-            if(magnified){
-                if(scroll_y > 0) scroll_y--;
-                console.log(scroll_y);
-                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+scroll_y * 500/scale).toString()+'px';
+            // 여기까지
+            else if (result == '클릭'){
+                left_click(gaze_x,gaze_y);
             }
-            else {
-                outer_scroll = Math.max(outer_scroll-500, 0);
-                window.scrollTo(0, outer_scroll);
+            else if (result == '아래로'){
+                window.scrollBy({top : 500,behavior : "smooth"});
+                if(magnified){
+                    scroll_y++;
+
+                    console.log(scroll_y);
+                    document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+(scroll_y) * 500/scale).toString()+'px';
+                }
+                else{
+                    outer_scroll = Math.min(outer_scroll+500, document.body.scrollHeight);
+                    window.scrollTo(0, outer_scroll);
+                }
             }
-        }
-        else if (result == '뒤로'){
-            window.history.go(-1);
-        }
-        else if (result == '앞으로'){
-            window.history.go(1);
-        }
-        else if (result == '줌' || result =='춤'){
-            if (targetGUIElements.length > 0 && !magnified){
-                magnified = true;
-                targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
-                /*
-                for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
-                    targetGUIElements[i].matchedNode.style.border = null;
-                }*/
-                targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
-                
-                if(targetGUIElements[targetGUIElementsIndex].navCollection && targetGUIElements[targetGUIElementsIndex].navCollection.navItems ) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
-                
-                console.log(links_objects.length);
-                setDiv(targetGUIElements[targetGUIElementsIndex].matchedNodeRect);
-                zoom.to({
-                    element: (targetGUIElements[targetGUIElementsIndex].matchedNode),
-                    // Zoom 수행 이후 불려지는 callback 함수
-                    callback: function () {
-                        console.log("after zooming!");
-                        // Do something
-                    }
-                });
-     
+            else if (result == '위로'){
+                window.scrollBy({top : -500,behavior : "smooth"});
+                if(magnified){
+                    if(scroll_y > 0) scroll_y--;
+                    console.log(scroll_y);
+                    document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+scroll_y * 500/scale).toString()+'px';
+                }
+                else {
+                    outer_scroll = Math.max(outer_scroll-500, 0);
+                    window.scrollTo(0, outer_scroll);
+                }
             }
-        }
-        else if(result == '명령어'){
-            if(magnified){
-                targetGUIElementsIndex = targetGUIElements.length -1;
-                if(targetGUIElements[targetGUIElementsIndex].navCollection && targetGUIElements[targetGUIElementsIndex].navCollection.navItems ) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
-                
-                setInterfaceTable(targetGUIElements[targetGUIElementsIndex].matchedNodeRect,links_objects.length);
+            else if (result == '뒤로'){
+                window.history.go(-1);
             }
-        }
-        else if(result == '접기'){
-            if(magnified){
+            else if (result == '앞으로'){
+                window.history.go(1);
+            }
+            else if (result == '줌' || result =='춤'){
+                if (targetGUIElements.length > 0 && !magnified){
+                    magnified = true;
+                    targetGUIElements[targetGUIElements.length-1].matchedNode.style.border = null;
+                    /*
+                    for (let i=0; i<targetGUIElements.length; i++){ // 중복확대 방지 위해 확대했던것 복구
+                        targetGUIElements[i].matchedNode.style.border = null;
+                    }*/
+                    targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
+
+                    if(targetGUIElements[targetGUIElementsIndex].navCollection && targetGUIElements[targetGUIElementsIndex].navCollection.navItems ) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
+
+                    console.log(links_objects.length);
+                    setDiv(targetGUIElements[targetGUIElementsIndex].matchedNodeRect);
+                    zoom.to({
+                        element: (targetGUIElements[targetGUIElementsIndex].matchedNode),
+                        // Zoom 수행 이후 불려지는 callback 함수
+                        callback: function () {
+                            console.log("after zooming!");
+                            // Do something
+                        }
+                    });
+
+                }
+            }
+            else if(result == '명령어'){
+                if(magnified){
+                    targetGUIElementsIndex = targetGUIElements.length -1;
+                    if(targetGUIElements[targetGUIElementsIndex].navCollection && targetGUIElements[targetGUIElementsIndex].navCollection.navItems ) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
+
+                    setInterfaceTable(targetGUIElements[targetGUIElementsIndex].matchedNodeRect,links_objects.length);
+                }
+            }
+            else if(result == '접기'){
+                if(magnified){
+                    document.getElementsByClassName('zoom')[0].remove();
+                    targetGUIElementsIndex = targetGUIElements.length -1;
+                    setDiv(targetGUIElements[targetGUIElementsIndex].matchedNodeRect);
+                }
+            }
+            else if (result == '아웃'){
+                magnified = false;
                 document.getElementsByClassName('zoom')[0].remove();
-                targetGUIElementsIndex = targetGUIElements.length -1;
-                setDiv(targetGUIElements[targetGUIElementsIndex].matchedNodeRect);
+                scroll_x = 0;
+                scroll_y = 0;
+                links_objects = [];
+                zoom.out();
+            }
+            else if (result == '첫 번째로'){
+                if(magnified && links_objects){
+                    var rect = links_objects[0].matchedNodeRect;
+                    left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+                }
+            }
+            else if (result == '두 번째로'){
+                if(magnified && links_objects && links_objects.length >1){
+                    var rect = links_objects[1].matchedNodeRect;
+                    left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+                }
+            }
+            else if (result == '세 번째로'){
+                if(magnified && links_objects && links_objects.length >2){
+                    var rect = links_objects[2].matchedNodeRect;
+                    left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+                }
+            }
+            else if (result == '네 번째로'){
+                if(magnified && links_objects && links_objects.length >2){
+                    var rect = links_objects[3].matchedNodeRect;
+                    left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+                }
+            }
+            else if (result == '다섯 번째로'){
+                if(magnified && links_objects && links_objects.length >2){
+                    var rect = links_objects[4].matchedNodeRect;
+                    left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+                }
+            }
+            else if (result == '여섯 번째로'){
+                if(magnified && links_objects && links_objects.length >2){
+                    var rect = links_objects[5].matchedNodeRect;
+                    left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
+                }
+            }
+            else if (result.split(' ')[0] == '검색'){
+                console.log(screenRoot.childSegments[find_search()]);
+                var search_node = screenRoot.childSegments[find_search()].searchInputNode;
+                if(magnified && targetGUIElements[targetGUIElements.length-1].constructor.name == 'searchSegment' ){
+                    search_node = targetGUIElements[targetGUIElements.length-1].searchInputNode;
+                }
+                else if(magnified && targetGUIElements[targetGUIElements.length-1].constructor.name != 'searchSegment' ){
+                    search_node = null;
+                }
+                if(search_node){
+                    console.log(search_node);
+                    search_node.value = result.slice(3);
+                    const handler = new DefaultEventHandler();
+                    handler.dispatchPointClick(screenRoot.childSegments[find_search()].matchedNodeRect);
+                    handler.dispatchEnterInput();
+                }
             }
         }
-        else if (result == '아웃'){
-            magnified = false;
-            document.getElementsByClassName('zoom')[0].remove();
-            scroll_x = 0;
-            scroll_y = 0;
-            links_objects = [];
-            zoom.out();
-        }
-        else if (result == '첫 번째로'){
-            if(magnified && links_objects){
-                var rect = links_objects[0].matchedNodeRect;
-                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
-            }
-        }
-        else if (result == '두 번째로'){
-            if(magnified && links_objects && links_objects.length >1){
-                var rect = links_objects[1].matchedNodeRect;
-                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
-            }
-        }
-        else if (result == '세 번째로'){
-            if(magnified && links_objects && links_objects.length >2){
-                var rect = links_objects[2].matchedNodeRect;
-                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
-            }
-        }
-        else if (result == '네 번째로'){
-            if(magnified && links_objects && links_objects.length >2){
-                var rect = links_objects[3].matchedNodeRect;
-                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
-            }
-        }
-        else if (result == '다섯 번째로'){
-            if(magnified && links_objects && links_objects.length >2){
-                var rect = links_objects[4].matchedNodeRect;
-                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
-            }
-        }
-        else if (result == '여섯 번째로'){
-            if(magnified && links_objects && links_objects.length >2){
-                var rect = links_objects[5].matchedNodeRect;
-                left_click((rect.xmin+rect.xmax)*0.5,(rect.ymin+rect.ymax)*0.5);
-            }
-        }
-        else if (result.split(' ')[0] == '검색'){
-            console.log(screenRoot.childSegments[find_search()]);
-            var search_node = screenRoot.childSegments[find_search()].searchInputNode;
-            if(magnified && targetGUIElements[targetGUIElements.length-1].constructor.name == 'searchSegment' ){
-                search_node = targetGUIElements[targetGUIElements.length-1].searchInputNode;
-            }
-            else if(magnified && targetGUIElements[targetGUIElements.length-1].constructor.name != 'searchSegment' ){
-                search_node = null;
-            }
-            if(search_node){
-                console.log(search_node);
-                search_node.value = result.slice(3);
-                const handler = new DefaultEventHandler();
-                handler.dispatchPointClick(screenRoot.childSegments[find_search()].matchedNodeRect);
-                handler.dispatchEnterInput();
-            }
-        }
-    }
-});
-recognition.addEventListener("end",recognition.start);
-recognition.start();
+    });
+    recognition.addEventListener("end",recognition.start);
+    recognition.start();
+    console.log('recognition', recognition)
+}
 // SpeechRecognition 끝
 function getTarget(){
     var loca = {x:gaze_x,y:gaze_y};
@@ -2580,6 +2584,11 @@ function initWebGazer() {
         prevGazePoint.x = data.x
         prevGazePoint.y = data.y
     }).showPredictionPoints(false).begin()
+    setTimeout(function() {
+        const videoContainer = document.getElementById('webgazerVideoContainer')
+        videoContainer.style.top = null;
+        videoContainer.style.bottom = '0px'
+    }, 3000)
 }
 function calibrateWebGazer() {
     const plottingCanvas = document.createElement('canvas')
@@ -2600,13 +2609,13 @@ function calibrateWebGazer() {
         position: 'fixed'
     }
     const calibrationButtonEachStyle = [
-        {top: '70px', left: '340px'},
+        {top: '70px', left: '2vw'},
         {top: '70px', left: '50vw'},
         {top: '70px', right: '2vw'},
         {top: '50vh', left: '2vw'},
         {top: '50vh', left: '50vw'},
         {top: '50vh', right: '2vw'},
-        {bottom: '2vw', left: '2vw'},
+        {bottom: '2vw', left: '340px'},
         {bottom: '2vw', left: '50vw'},
         {bottom: '2vw', right: '2vw'},
     ]
@@ -2902,7 +2911,7 @@ var setOutterButton = function(){
     leftElement.appendChild(leftButton);
     leftElement.appendChild(leftstr);
     leftElement.style.position = 'fixed';
-    leftElement.style.top = '300px';
+    leftElement.style.bottom = '300px';
     leftElement.style.left = '20px';
     leftElement.style.border = '1px solid black';
     leftElement.style.width = '60px'
@@ -2923,7 +2932,7 @@ var setOutterButton = function(){
     rightElement.appendChild(rightButton);
     rightElement.appendChild(rightstr);
     rightElement.style.position = 'fixed';
-    rightElement.style.top = '300px';
+    rightElement.style.bottom = '300px';
     rightElement.style.left = '90px';
     rightElement.style.border = '1px solid black';
     rightElement.style.width = '60px'
@@ -3119,6 +3128,7 @@ layout_shift_observer.observe({ entryTypes: ["layout-shift"] });
 window.addEventListener("load", function (event) {
 
     initWebGazer()
+    initSpeechRecognition()
 
     targetResources = new Array();
     resource_num = 0;
