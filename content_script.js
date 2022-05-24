@@ -2102,6 +2102,8 @@ var setInterfaceTable = function(a,b){
     let thead = document.createElement('thead');
     let tbody = document.createElement('tbody');
     table.className = 'zoom';
+    thead.style.padding='1px';
+    tbody.style.padding='1px';
     table.appendChild(thead);
     table.appendChild(tbody);
     table.style.position = 'fixed';
@@ -2129,6 +2131,7 @@ var setInterfaceTable = function(a,b){
     heading_6.innerHTML = "아래로";
     let row_1_data = document.createElement('th');
     row_1_data.innerHTML = "이전";
+    
     row_1.appendChild(heading_1);
     row_1.appendChild(heading_2);
     row_1.appendChild(heading_3);
@@ -2168,19 +2171,26 @@ var setInterfaceTable = function(a,b){
 
     let heading = document.createElement('td');
     heading.innerHTML = "음성명령어";
+    heading.style.fontWeight='bold';
     let heading_7 = document.createElement('td');
     heading_7.innerHTML = "위로";
+    heading_7.style.fontWeight='bold';
     let heading_8 = document.createElement('td');
     heading_8.innerHTML = "왼쪽으로";
+    heading_8.style.fontWeight='bold';
     let heading_9 = document.createElement('td');
     heading_9.innerHTML = "오른쪽으로";
+    heading_9.style.fontWeight='bold';
     let heading_10 = document.createElement('td');
     heading_10.innerHTML = "n번째로";
+    heading_10.style.fontWeight='bold';
     let heading_11 = document.createElement('td');
     heading_11.innerHTML = "검색 N";
+    heading_11.style.fontWeight='bold';
     let heading_12 = document.createElement('td');
     heading_12.innerHTML = "접기";
-    
+    heading_12.style.fontWeight='bold';
+
     row_3.appendChild(heading);
     row_3.appendChild(heading_7);
     row_3.appendChild(heading_8);
@@ -2220,12 +2230,16 @@ var setInterfaceTable = function(a,b){
 
     let row_5_data = document.createElement('td');
     row_5_data.innerHTML = "음성명령어";
+    row_5_data.style.fontWeight='bold';
     let row_5_data_1 = document.createElement('td');
     row_5_data_1.innerHTML = "다음";
+    row_5_data_1.style.fontWeight='bold';
     let row_5_data_2 = document.createElement('td');
     row_5_data_2.innerHTML = "확대";
+    row_5_data_2.style.fontWeight='bold';
     let row_5_data_3 = document.createElement('td');
     row_5_data_3.innerHTML = "축소";
+    row_5_data_3.style.fontWeight='bold';
     
     row_5.appendChild(row_5_data);
     row_5.appendChild(row_5_data_1);
