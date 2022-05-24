@@ -2083,8 +2083,21 @@ class GUIModelExtractor {
         this.screenParsedCallback = callback;
     }
 }
+var setDiv=function(a){
+    let div = document.createElement('div');
+    div.className = 'zoom';
+    div.textContent = '명령어 보기: 명령어';
+    div.style.position = 'fixed';
+    div.style.backgroundColor='white';
+    div.style.opacity=0.7;
+    div.style.width = '150px';
+    div.style.top = (a.ymin + 20).toString()+'px';
+    div.style.left = ((a.xmin+a.xmax)*0.5 -50).toString()+'px'; 
+    document.body.appendChild(div);
+}
 var setInterfaceTable = function(a,b){
     // show based on element
+    document.getElementsByClassName('zoom')[0].remove();
     let table = document.createElement('table');
     let thead = document.createElement('thead');
     let tbody = document.createElement('tbody');
@@ -2092,13 +2105,13 @@ var setInterfaceTable = function(a,b){
     table.appendChild(thead);
     table.appendChild(tbody);
     table.style.position = 'fixed';
-    table.style.top = (a.ymin-10).toString()+'px';
+    table.style.top = (a.ymin+20).toString()+'px';
     table.style.left = (a.xmin+10).toString()+'px';
-    table.style.backgroundColor = 'gray';
+    table.style.backgroundColor = 'white';
     table.style.borderCollapse = 'collapse';
     table.style.borderSpacing = 0;
-    table.style.opacity = 0.7;
-    table.style.width = (a.xmax - a.xmin - 50).toString() + 'px';
+    table.style.width = (a.xmax - a.xmin).toString() + 'px';
+    table.style.textAlign='center';
     document.body.appendChild(table);
 
     let row_1 = document.createElement('tr');
@@ -2114,24 +2127,12 @@ var setInterfaceTable = function(a,b){
     heading_5.innerHTML = "아웃";
     let heading_6 = document.createElement('th');
     heading_6.innerHTML = "아래로";
-    let heading_7 = document.createElement('th');
-    heading_7.innerHTML = "위로";
-    let heading_8 = document.createElement('th');
-    heading_8.innerHTML = "왼쪽으로";
-    let heading_9 = document.createElement('th');
-    heading_9.innerHTML = "오른쪽으로";
-    let heading_10 = document.createElement('th');
-    heading_10.innerHTML = "n번째로";
     row_1.appendChild(heading_1);
     row_1.appendChild(heading_2);
     row_1.appendChild(heading_3);
     row_1.appendChild(heading_4);
     row_1.appendChild(heading_5);
     row_1.appendChild(heading_6);
-    row_1.appendChild(heading_7);
-    row_1.appendChild(heading_8);
-    row_1.appendChild(heading_9);
-    row_1.appendChild(heading_10);
     thead.appendChild(row_1);
 
 
@@ -2140,7 +2141,7 @@ var setInterfaceTable = function(a,b){
     let row_2_data_1 = document.createElement('td');
     row_2_data_1.innerHTML = "기능";
     let row_2_data_2 = document.createElement('td');
-    row_2_data_2.innerHTML = "해당 위치 클릭";
+    row_2_data_2.innerHTML = "해당 위치\n클릭";
     let row_2_data_3 = document.createElement('td');
     row_2_data_3.innerHTML = "이전 페이지";
     let row_2_data_4 = document.createElement('td');
@@ -2148,27 +2149,66 @@ var setInterfaceTable = function(a,b){
     let row_2_data_5 = document.createElement('td');
     row_2_data_5.innerHTML = "줌 종료";
     let row_2_data_6 = document.createElement('td');
-    row_2_data_6.innerHTML = "스크롤 아래로";
-    let row_2_data_7 = document.createElement('td');
-    row_2_data_7.innerHTML = "스크롤 위로";
-    let row_2_data_8 = document.createElement('td');
-    row_2_data_8.innerHTML = "스크롤 왼쪽으로";
-    let row_2_data_9 = document.createElement('td');
-    row_2_data_9.innerHTML = "스크롤 오른쪽으로";
-    let row_2_data_10 = document.createElement('td');
-    row_2_data_10.innerHTML = "n번째 링크로(최대"+b.toString()+')';
+    row_2_data_6.innerHTML = "스크롤<br>아래로";
     row_2.appendChild(row_2_data_1);
     row_2.appendChild(row_2_data_2);
     row_2.appendChild(row_2_data_3);
     row_2.appendChild(row_2_data_4);
     row_2.appendChild(row_2_data_5);
     row_2.appendChild(row_2_data_6);
-    row_2.appendChild(row_2_data_7);
-    row_2.appendChild(row_2_data_8);
-    row_2.appendChild(row_2_data_9);
-    row_2.appendChild(row_2_data_10);
     tbody.appendChild(row_2);
     
+    let row_3 = document.createElement('tr');
+
+    let heading = document.createElement('td');
+    heading.innerHTML = "음성명령어";
+    let heading_7 = document.createElement('td');
+    heading_7.innerHTML = "위로";
+    let heading_8 = document.createElement('td');
+    heading_8.innerHTML = "왼쪽으로";
+    let heading_9 = document.createElement('td');
+    heading_9.innerHTML = "오른쪽으로";
+    let heading_10 = document.createElement('td');
+    heading_10.innerHTML = "n번째로";
+    let heading_11 = document.createElement('td');
+    heading_11.innerHTML = "검색 N";
+    let heading_12 = document.createElement('td');
+    heading_12.innerHTML = "접기";
+    
+    row_3.appendChild(heading);
+    row_3.appendChild(heading_7);
+    row_3.appendChild(heading_8);
+    row_3.appendChild(heading_9);
+    row_3.appendChild(heading_10);
+    row_3.appendChild(heading_11);
+    row_3.appendChild(heading_12);
+    tbody.appendChild(row_3);
+
+    let row_4 = document.createElement('tr');
+
+    let row_4_data_1 = document.createElement('td');
+    row_4_data_1.innerHTML = "기능";
+    let row_4_data_7 = document.createElement('td');
+    row_4_data_7.innerHTML = "스크롤<br>위로";
+    let row_4_data_8 = document.createElement('td');
+    row_4_data_8.innerHTML ="스크롤<br>왼쪽으로";
+    let row_4_data_9 = document.createElement('td');
+    row_4_data_9.innerHTML = "스크롤<br>오른쪽으로";
+    let row_4_data_10 = document.createElement('td');
+    row_4_data_10.innerHTML =  "n번째 링크로<br>(최대"+b.toString()+')';
+    let row_4_data_11 = document.createElement('td');
+    row_4_data_11.innerHTML =  "검색창에 N 검색";
+    let row_4_data_12 = document.createElement('td');
+    row_4_data_12.innerHTML = "명령어 표 접기";
+    
+    row_4.appendChild(row_4_data_1);
+    row_4.appendChild(row_4_data_7);
+    row_4.appendChild(row_4_data_8);
+    row_4.appendChild(row_4_data_9);
+    row_4.appendChild(row_4_data_10);
+    row_4.appendChild(row_4_data_11);
+    row_4.appendChild(row_4_data_12);
+    tbody.appendChild(row_4);
 }
 let screenRoot = new SegmentedScreen();
 var targetGUIElements = []; //타겟 엘리먼트 최근에 본 걸로 저장
@@ -2216,23 +2256,15 @@ recognition.addEventListener("result",(e)=> {
             window.scrollBy({left : -500,behavior : "smooth"});
             if(magnified){
                 if(scroll_x > 0) scroll_x--;
-                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+scroll_x * 500).toString()+'px';
+                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+scroll_x * 500/scale).toString()+'px';
             }
         }
         else if (result == '오른쪽으로'){
             window.scrollBy({left : 500,behavior : "smooth"});
             if(magnified){
-                var scroll_locationW = document.documentElement.scrollWidth;
-                var window_width = window.innerWidth;
-                var fullWidth = document.body.scrollWidth;
-                var move = 500;
-                if(scroll_locationW + window_width >= fullWidth) {
-                    move = 500 + fullWidth - (scroll_locationW + window_width);
-                }
-                else{
-                    scroll_x++;
-                }
-                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x-1) * 500+move).toString()+'px';
+                scroll_x++;
+                
+                document.getElementsByClassName('zoom')[0].style.left = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.xmin+10)+(scroll_x) * 500/scale).toString()+'px';
             }
         }
         else if (result == '클릭'){
@@ -2241,24 +2273,18 @@ recognition.addEventListener("result",(e)=> {
         else if (result == '아래로'){
             window.scrollBy({top : 500,behavior : "smooth"});
             if(magnified){
-                var scroll_locationH = document.documentElement.scrollHeight;
-                var window_height = window.innerHeight;
-                var fullHeight = document.body.scrollHeight;
-                var move = 500;
-                if(scroll_locationH + window_height >= fullHeight) {
-                    move = 500 + fullHeight - (scroll_locationH + window_height);
-                }
-                else{
-                    scroll_y++;
-                }
-                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+(scroll_y-1) * 500+move).toString()+'px';
+                scroll_y++;
+                
+                console.log(scroll_y);
+                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+(scroll_y) * 500/scale).toString()+'px';
             }
         }
         else if (result == '위로'){
             window.scrollBy({top : -500,behavior : "smooth"});
             if(magnified){
                 if(scroll_y > 0) scroll_y--;
-                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+scroll_y * 500).toString()+'px';
+                console.log(scroll_y);
+                document.getElementsByClassName('zoom')[0].style.top = ((targetGUIElements[targetGUIElements.length-1].matchedNodeRect.ymin-10)+scroll_y * 500/scale).toString()+'px';
             }
         }
         else if (result == '뒤로'){
@@ -2277,10 +2303,10 @@ recognition.addEventListener("result",(e)=> {
                 }*/
                 targetGUIElementsIndex = targetGUIElements.length -1; // 맨 마지막 element를 선택
                 
-                if(targetGUIElements[targetGUIElementsIndex].navCollection.navItems) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
+                if(targetGUIElements[targetGUIElementsIndex].navCollection && targetGUIElements[targetGUIElementsIndex].navCollection.navItems ) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
                 
                 console.log(links_objects.length);
-                setInterfaceTable(targetGUIElements[targetGUIElementsIndex].matchedNodeRect,links_objects.length);
+                setDiv(targetGUIElements[targetGUIElementsIndex].matchedNodeRect);
                 zoom.to({
                     element: (targetGUIElements[targetGUIElementsIndex].matchedNode),
                     // Zoom 수행 이후 불려지는 callback 함수
@@ -2290,6 +2316,21 @@ recognition.addEventListener("result",(e)=> {
                     }
                 });
      
+            }
+        }
+        else if(result == '명령어'){
+            if(magnified){
+                targetGUIElementsIndex = targetGUIElements.length -1;
+                if(targetGUIElements[targetGUIElementsIndex].navCollection && targetGUIElements[targetGUIElementsIndex].navCollection.navItems ) links_objects = targetGUIElements[targetGUIElementsIndex].navCollection.navItems;
+                
+                setInterfaceTable(targetGUIElements[targetGUIElementsIndex].matchedNodeRect,links_objects.length);
+            }
+        }
+        else if(result == '접기'){
+            if(magnified){
+                document.getElementsByClassName('zoom')[0].remove();
+                targetGUIElementsIndex = targetGUIElements.length -1;
+                setDiv(targetGUIElements[targetGUIElementsIndex].matchedNodeRect);
             }
         }
         else if (result == '아웃'){
