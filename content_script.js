@@ -2847,8 +2847,31 @@ function findButtons(){
             if (tmp_attributes[j].value.includes('prev')){
                 check_attri_prev = true;
             }
+            else if (tmp_attributes[j].value.includes('이전')){
+                check_attri_prev = true;
+            }
             else if (tmp_attributes[j].value.includes('next')){
                 check_attri_next = true;
+            }
+            else if (tmp_attributes[j].value.includes('다음')){
+                check_attri_next = true;
+            }
+        }
+        if (!check_attri_prev && !check_attri_next){
+            for (var ii = 0; ii < element_buttons[i].childNodes.length; ii++){
+                var tmp_text = element_buttons[i].childNodes[ii].textContent;
+                if (tmp_text.includes('prev')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('이전')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('next')){
+                    check_attri_next = true;
+                }
+                else if (tmp_text.includes('다음')){
+                    check_attri_next = true;
+                }
             }
         }
         if (check_attri_prev){
@@ -2866,8 +2889,31 @@ function findButtons(){
             if (tmp_attributes[j].value.includes('prev')){
                 check_attri_prev = true;
             }
+            else if (tmp_attributes[j].value.includes('이전')){
+                check_attri_prev = true;
+            }
             else if (tmp_attributes[j].value.includes('next')){
                 check_attri_next = true;
+            }
+            else if (tmp_attributes[j].value.includes('다음')){
+                check_attri_next = true;
+            }
+        }
+        if (!check_attri_prev && !check_attri_next){
+            for (var ii = 0; ii < element_as[i].childNodes.length; ii++){
+                var tmp_text = element_as[i].childNodes[ii].textContent;
+                if (tmp_text.includes('prev')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('이전')){
+                    check_attri_prev = true;
+                }
+                else if (tmp_text.includes('next')){
+                    check_attri_next = true;
+                }
+                else if (tmp_text.includes('다음')){
+                    check_attri_next = true;
+                }
             }
         }
         if (check_attri_prev){
@@ -2910,9 +2956,11 @@ function keyListener(e){
         }
     }
     if (e.code === 'KeyD'){
+        console.log(next_elements);
         next_elements[0].click();
     }
     if (e.code === 'KeyA'){
+        console.log(prev_elements);
         prev_elements[0].click();
     }
     if (e.code === 'ControlLeft'){
